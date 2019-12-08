@@ -7,9 +7,19 @@ var Schema = mongoose.Schema;
 // This is similar to a Sequelize model
 var HikeSchema = new Schema({
   // `title` is required and of type String
+  apiId: {
+    type: Number,
+    unique: true,
+    required: true
+  },
   name: {
     type: String,
     required: true
+  },
+  location: {
+    type: String,
+    required: true,
+    default: "No location info available"
   },
   summary: {
     type: String,

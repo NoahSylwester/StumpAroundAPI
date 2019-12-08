@@ -27,21 +27,37 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/StumpAround"
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 // example routes
-app.get("/hikes", function (req, res) {
-    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=300&key=200649274-302d66556efb2a72c44c396694a27540')
+app.post("/hikes", function (req, res) {
+    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&key=200649274-302d66556efb2a72c44c396694a27540')
         .then(function (response) {
             // console.log(response.data.trails);
             let trailsData = response.data.trails;
-            console.log(trailsData);
             for (let i = 0; i < trailsData.length; i++) {
                 db.Hike.create({
+                    apiId: trailsData[i].id,
                     name: trailsData[i].name,
+                    location: trailsData[i].location,
                     summary: trailsData[i].summary,
                     photo: trailsData[i].imgSmall,
                     length: trailsData[i].length
+                }).catch(function(err) {
+                    if (err.errmsg.substr(0,6) === "E11000") {
+                        console.log("id already exists");
+                    }
+                    else {
+                        console.log("other error");
+                    }
                 })
             }
         })
+        res.redirect("/hikes");
+});
+
+app.get("/hikes", function (req, res) {
+    db.Hike.find({})
+    .then(function (records) {
+        res.json(records);
+    })
 });
 
 app.post("/", function (req, res) {
