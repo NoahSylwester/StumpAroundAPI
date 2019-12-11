@@ -26,7 +26,7 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/StumpAround"
 // // Connect to the Mongo DB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
-// example routes
+// add hikes to database from API call
 app.post("/hikes", function (req, res) {
     axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=&key=200649274-302d66556efb2a72c44c396694a27540')
         .then(function (response) {
@@ -38,7 +38,7 @@ app.post("/hikes", function (req, res) {
                     name: trailsData[i].name,
                     location: trailsData[i].location,
                     summary: trailsData[i].summary,
-                    photo: trailsData[i].imgSmall,
+                    photo: trailsData[i].imgMedium,
                     length: trailsData[i].length
                 })
                     .catch(function (err) {
@@ -53,16 +53,15 @@ app.post("/hikes", function (req, res) {
         })
     res.redirect("/hikes");
 });
-
+//display all hikes in database
 app.get("/hikes", function (req, res) {
     db.Hike.find({})
         .then(function (records) {
             res.json(records);
         })
 });
-
+//get only one hike's info
 app.get("/hike/:id", function (req, res) {
-    console.log("serverside ID is: ", req.params.id);
     db.Hike.findOne({ _id: req.params.id })
         .populate("comment")
         .then(function (hikeRecord) {
@@ -73,6 +72,18 @@ app.get("/hike/:id", function (req, res) {
         });
 });
 
+//get only one user's info
+app.get("/user/:username", function (req, res) {
+    db.User.findOne({ name: req.params.username })
+        .populate("comment")
+        .then(function (userRecord) {
+            res.json(userRecord);
+        })
+        .catch(function (err) {
+            res.json(err);
+        });
+});
+//enter new user in database
 app.post("/user/:username/:password/:email", function (req, res) {
     let name = req.params.username;
     let password = req.params.password;
