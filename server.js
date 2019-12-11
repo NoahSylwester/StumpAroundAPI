@@ -28,7 +28,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 // example routes
 app.post("/hikes", function (req, res) {
-    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&key=200649274-302d66556efb2a72c44c396694a27540')
+    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=&key=200649274-302d66556efb2a72c44c396694a27540')
         .then(function (response) {
             // console.log(response.data.trails);
             let trailsData = response.data.trails;
@@ -40,24 +40,59 @@ app.post("/hikes", function (req, res) {
                     summary: trailsData[i].summary,
                     photo: trailsData[i].imgSmall,
                     length: trailsData[i].length
-                }).catch(function(err) {
-                    if (err.errmsg.substr(0,6) === "E11000") {
-                        console.log("id already exists");
-                    }
-                    else {
-                        console.log("other error");
-                    }
                 })
+                    .catch(function (err) {
+                        if (err.errmsg.substr(0, 6) === "E11000") {
+                            console.log("id already exists");
+                        }
+                        else {
+                            console.log("other error");
+                        }
+                    })
             }
         })
-        res.redirect("/hikes");
+    res.redirect("/hikes");
 });
 
 app.get("/hikes", function (req, res) {
     db.Hike.find({})
-    .then(function (records) {
-        res.json(records);
-    })
+        .then(function (records) {
+            res.json(records);
+        })
+});
+
+app.get("/hike/:id", function (req, res) {
+    console.log("serverside ID is: ", req.params.id);
+    db.Hike.findOne({ _id: req.params.id })
+        .populate("comment")
+        .then(function (hikeRecord) {
+            res.json(hikeRecord);
+        })
+        .catch(function (err) {
+            res.json(err);
+        });
+});
+
+app.post("/user/:username/:password/:email", function (req, res) {
+    let name = req.params.username;
+    let password = req.params.password;
+    let email = req.params.email;
+
+    db.User.find({})
+        .then(function (userRecords) {
+            for (let i = 0; i < userRecords.length; i++) {
+                if (!(name === userRecords[i].name) && !(email === userRecords[i].email)) {
+                    db.User.create({
+                        name,
+                        password,
+                        email,
+                    })
+                }
+                else {
+                    console.log("Cannot create new user");
+                }
+            }
+        })
 });
 
 app.post("/", function (req, res) {
