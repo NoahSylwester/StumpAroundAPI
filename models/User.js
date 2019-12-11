@@ -15,6 +15,10 @@ var UserSchema = new Schema({
     type: String,
     required: true
   },
+  email: {
+    type: String,
+    required: true
+  },
   // `link` is required and of type String
   date_created: {
     type: Date,
