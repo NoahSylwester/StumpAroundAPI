@@ -38,12 +38,14 @@ $("#hike").on('click', function (event) {
 //add a new user to database
 $("#addUser").on('click', function (event) {
     event.preventDefault();
-    let username = $(this).data('username');
-    let password = $(this).data('password');
-    let email = $(this).data('email');
     $.ajax({
         method: 'POST',
-        url: `/user/${username}/${password}/${email}`
+        url: `/user/add`,
+        data: {
+            name: $(this).data('username'),
+            password: $(this).data('password'),
+            email: $(this).data('email')
+        }
     })
 })
 
@@ -53,7 +55,10 @@ $("#getOneUser").on('click', function (event) {
     let username = $(this).data('username');
     $.ajax({
         method: 'GET',
-        url: `/user/${username}`
+        url: `/get/user`,
+        body: {
+            name: username
+        }
     })
         .then(function (response) {
             console.log(response);
@@ -62,3 +67,19 @@ $("#getOneUser").on('click', function (event) {
             console.log(err);
         })
 })
+
+//add a bio to a user
+$("#addBio").on('click', function (event) {
+    event.preventDefault();
+    let username = $(this).data('username');
+    $.ajax({
+        method: 'PUT',
+        url: `/user/${username}`
+    })
+        .then(function (response) {
+            console.log(response);
+        })
+        .catch(function (err) {
+            console.log(err)
+        })
+});
