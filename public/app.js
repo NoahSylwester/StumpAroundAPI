@@ -116,3 +116,21 @@ $("#addComment").on('click', function(event) {
         }
     })
 })
+
+//delete a comment
+$("#deleteComment").on('click', function(event) {
+    console.log($(this).data('commentid'));
+    console.log($(this).data('userid'));
+    event.preventDefault();
+    $.ajax({
+        method: 'DELETE',
+        url: '/commentdelete',
+        data: {
+            id: $(this).data('commentid'),
+            user: $(this).data('userid')
+        }
+    })
+    .then(function(response) {
+        console.log(response);
+    })
+})

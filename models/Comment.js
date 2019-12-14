@@ -13,14 +13,14 @@ var CommentSchema = new Schema({
     required: true,
     default: Date.now,
   },
-  users: [{
+  users: {
     type: Schema.Types.ObjectId,
     ref: "User"
-  }],
-  hikes: [{
+  },
+  hikes: {
     type: Schema.Types.ObjectId,
     ref: "Hike"
-  }]
+  }
 });
 
 // This creates our model from the above schema, using mongoose's model method

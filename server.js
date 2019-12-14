@@ -154,6 +154,32 @@ app.post("/comment", function (req, res) {
         })
 })
 
+//delete a comment
+app.delete("/commentdelete", function (req, res) {
+    console.log(req.body);
+    db.Comment.findOne({ 
+        _id: req.body.id })
+    .then(function (commentData) {
+        console.log(commentData);
+        db.User.findOne({
+            _id: req.body.user
+        })
+        .then(function (userData) {
+            if (userData._id.equals(commentData.users)) {
+                db.Comment.deleteOne({ _id: req.body.id})
+                .then(function (commentDelete) {
+                    console.log("comment deleted");
+                    res.json(commentDelete.hikes);
+                })
+            }
+            else {
+                res.json("You don't have permissions to delete this.")
+            }
+        })
+        
+    }) 
+});
+
 app.post("/", function (req, res) {
     res.json('POST');
 });
