@@ -65,13 +65,16 @@ $("#getOneUser").on('click', function (event) {
         })
 })
 
-//add a bio to a user
+//update a bio to a user
 $("#addBio").on('click', function (event) {
     event.preventDefault();
-    let username = $(this).data('username');
     $.ajax({
         method: 'PUT',
-        url: `/user/${username}`
+        url: '/bio',
+        data: {
+            name: $(this).data('username'),
+            bio: $(this).data('bio')
+        }
     })
         .then(function (response) {
             console.log(response);
@@ -80,3 +83,36 @@ $("#addBio").on('click', function (event) {
             console.log(err)
         })
 });
+
+//update a user's photo
+$("#addPhoto").on('click', function (event) {
+    event.preventDefault();
+    $.ajax({
+        method: 'PUT',
+        url: '/photo',
+        data: {
+            name: $(this).data('username'),
+            photo: $(this).data('photo')
+        }
+    })
+        .then(function (response) {
+            console.log(response);
+        })
+        .catch(function (err) {
+            console.log(err)
+        })
+})
+
+//add a comment to a hike
+$("#addComment").on('click', function(event) {
+    event.preventDefault();
+    $.ajax({
+        method: 'POST',
+        url: '/comment',
+        data: {
+            users: $(this).data('id'),
+            hikes: $(this).data('hike'),
+            content: $(this).data('comment')
+        }
+    })
+})
