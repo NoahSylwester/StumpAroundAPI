@@ -97,9 +97,10 @@ app.post("/user/add", function (req, res) {
 });
 
 //get route to get only one user's data
-app.get("/get/user", function (req, res) {
+app.get("/user/:username", function (req, res) {
+    let name = req.params.username;
     db.User.findOne({
-        name: req.body.name
+        name: name
     })
         .populate("comments")
         .populate("hikes")

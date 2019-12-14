@@ -55,10 +55,7 @@ $("#getOneUser").on('click', function (event) {
     let username = $(this).data('username');
     $.ajax({
         method: 'GET',
-        url: `/get/user`,
-        body: {
-            name: username
-        }
+        url: `/user/${username}`
     })
         .then(function (response) {
             console.log(response);
