@@ -112,10 +112,46 @@ app.get("/user/:username", function (req, res) {
         });
 });
 
+//route to update a user's bio
 app.put("/bio", function (req, res) {
-    db.User.findOne({
+    db.User.findOneAndUpdate({ name: req.body.name }, { bio: req.body.bio })
+        .then(function (updateBio) {
+            db.User.findOne({ name: req.body.name })
+                .then(function (updatedProfile) {
+                    console.log("bio updated!");
+                    res.json(updatedProfile);
+                })
+                .catch(function (err) {
+                    res.json(err);
+                });
+        })
+})
 
-    })
+//route to update a user's photo
+app.put("/photo", function (req, res) {
+    db.User.findOneAndUpdate({ name: req.body.name }, { photo: req.body.photo })
+        .then(function (updatePhoto) {
+            db.User.findOne({ name: req.body.name })
+                .then(function (updatedProfile) {
+                    console.log("photo updated!");
+                    res.json(updatedProfile);
+                })
+                .catch(function (err) {
+                    res.json(err);
+                });
+        })
+})
+
+//route to add a comment
+app.post("/comment", function (req, res) {
+    db.Comment.create(req.body)
+        .then(function (commentData) {
+            db.Hike.findOneAndUpdate({ _id: req.body.hikes }, { comment: commentData._id }, { new: true })
+            db.User.findOneAndUpdate({ _id: req.body.users }, { comment: commentData._id }, { new: true });
+        })
+        .catch(function(err) {
+            res.json(err);
+        })
 })
 
 app.post("/", function (req, res) {
