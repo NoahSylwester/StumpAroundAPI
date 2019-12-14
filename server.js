@@ -25,6 +25,22 @@ app.use(express.static("public"));
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/StumpAround";
 // // Connect to the Mongo DB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
+// login route
+app.post("/login", function (req, res) {
+    res.json({
+        email: req.body.email, 
+        password: req.body.password
+    })
+});
+
+// register route 
+app.post("/register", function (req, res) {
+    res.json({
+        email: req.body.email, 
+        password: req.body.password
+    })
+});
+
 
 // example routes
 app.post("/hikes", function (req, res) {
@@ -40,8 +56,8 @@ app.post("/hikes", function (req, res) {
                     summary: trailsData[i].summary,
                     photo: trailsData[i].imgSmall,
                     length: trailsData[i].length
-                }).catch(function(err) {
-                    if (err.errmsg.substr(0,6) === "E11000") {
+                }).catch(function (err) {
+                    if (err.errmsg.substr(0, 6) === "E11000") {
                         console.log("id already exists");
                     }
                     else {
@@ -50,14 +66,14 @@ app.post("/hikes", function (req, res) {
                 })
             }
         })
-        res.redirect("/hikes");
+    res.redirect("/hikes");
 });
 
 app.get("/hikes", function (req, res) {
     db.Hike.find({})
-    .then(function (records) {
-        res.json(records);
-    })
+        .then(function (records) {
+            res.json(records);
+        })
 });
 
 app.post("/", function (req, res) {

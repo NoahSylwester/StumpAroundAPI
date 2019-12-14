@@ -1,19 +1,9 @@
-$.getJSON("/hikes", function(data) {
-    console.log(data);
-});
-
-//scrapes from API and loads new data into database
-$("#Hikes").on('click', function(event) {
-    event.preventDefault();
-    $.ajax({
-        method: 'POST',
-        url: '/hikes'
-    })
-    .then(function(response) {
-        console.log(response);
-    })
-    .catch(function(err) {
-        console.log(err);
-    })
+$("#hikes").click(function () {
+    console.log("deadoralive")
+    $.post("http://localhost:8080/login",
+        {
+            email: "test",
+            password: "test",
+        }
+    )
 })
-
