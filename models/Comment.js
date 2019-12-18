@@ -13,11 +13,11 @@ var CommentSchema = new Schema({
     required: true,
     default: Date.now,
   },
-  users: {
+  user: {
     type: Schema.Types.ObjectId,
     ref: "User"
   },
-  hikes: {
+  hike: {
     type: Schema.Types.ObjectId,
     ref: "Hike"
   }

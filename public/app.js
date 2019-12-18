@@ -110,8 +110,8 @@ $("#addComment").on('click', function(event) {
         method: 'POST',
         url: '/comment',
         data: {
-            users: $(this).data('id'),
-            hikes: $(this).data('hike'),
+            user: $(this).data('id'),
+            hike: $(this).data('hike'),
             content: $(this).data('comment')
         }
     })
