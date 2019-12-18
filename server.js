@@ -148,9 +148,10 @@ app.post("/comment", function (req, res) {
         .then(function (commentData) {
             db.Hike.findOneAndUpdate({ _id: req.body.hike }, { comment: commentData._id }, { new: true })
             db.User.findOneAndUpdate({ _id: req.body.user }, { comment: commentData._id }, { new: true });
+            res.json(commentData);
         })
         .catch(function(err) {
-            res.json(err);
+            consol.log(err);
         })
 })
 
