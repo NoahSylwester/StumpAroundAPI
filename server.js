@@ -147,6 +147,7 @@ app.post("/comment", function (req, res) {
     db.Comment.create(req.body)
         .then(function (commentData) {
             db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id }}, { new: true })
+            .then((ress) => console.log(ress));
             db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id }}, { new: true });
             res.json(commentData);
         })
