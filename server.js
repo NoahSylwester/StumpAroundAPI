@@ -146,9 +146,11 @@ app.put("/photo", function (req, res) {
 app.post("/comment", function (req, res) {
     db.Comment.create(req.body)
         .then(function (commentData) {
+            console.log(commentData);
             db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id }}, { new: true })
-            .then((ress) => console.log(ress));
-            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id }}, { new: true });
+            .then((result) => console.log(result));
+            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id }}, { new: true })
+            .then((result) => console.log(result));
             res.json(commentData);
         })
         .catch(function(err) {
