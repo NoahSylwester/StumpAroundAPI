@@ -66,7 +66,7 @@ app.get("/hikes", function (req, res) {
 app.get("/hike/:id", function (req, res) {
     console.log("serverside ID is: ", req.params.id);
     db.Hike.findOne({ _id: req.params.id })
-        .populate("comment")
+        .populate("comments")
         .then(function (hikeRecord) {
             res.json(hikeRecord);
         })
