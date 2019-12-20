@@ -197,3 +197,9 @@ app.post("/", function (req, res) {
 app.listen(PORT, function () {
     console.log("App running on port " + PORT + "!");
 });
+app.post("/login", function (req, res) {
+    res.json('POST login');
+});
+app.post("/signup", function (req, res) {
+    res.json('POST signup');
+});
