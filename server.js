@@ -163,6 +163,39 @@ app.post("/comment", function (req, res) {
         })
 })
 
+//route to add a hike to favorites
+app.post("/favorite", function (req, res) {
+    let userId = req.body.userId;
+    let hikeId = req.body.hikeId;
+    db.User.findOneAndUpdate(
+        { userId: userId },
+        { $push: { hikes: hikeId } },
+        { new: true }
+    )
+    .then(function (userRecord) {
+        res.json(userRecord);
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+//route to delete a favorite from user
+app.delete("/favorite", function (req, res) {
+    let userId = req.body.userId;
+    let hikeId = req.body.hikeId;
+    db.User.findOneAndUpdate(
+        { userId: userId },
+        { $pull: { hikes: hikeId } },
+        { new: true }
+    )
+    .then(function (userRecord) {
+        res.json(userRecord);
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+
 //delete a comment
 app.delete("/commentdelete", function (req, res) {
     console.log(req.body);
