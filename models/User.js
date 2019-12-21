@@ -1,11 +1,13 @@
 var mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
+const saltRounds = 10;
 // Save a reference to the Schema constructor
 var Schema = mongoose.Schema;
 
 // Using the Schema constructor, create a new UserSchema object
 // This is similar to a Sequelize model
-var UserSchema = new Schema({
+const UserSchema = new mongoose.Schema({
   // `title` is required and of type String
   name: {
     type: String,
@@ -48,6 +50,35 @@ var UserSchema = new Schema({
   }],
 });
 
+UserSchema.pre('save', function(next) {
+  // Check if document is new or a new password has been set
+  if (this.isNew || this.isModified('password')) {
+    // Saving reference to this because of changing scopes
+    const document = this;
+    bcrypt.hash(document.password, saltRounds,
+      function(err, hashedPassword) {
+      if (err) {
+        next(err);
+      }
+      else {
+        document.password = hashedPassword;
+        next();
+      }
+    });
+  } else {
+    next();
+  }
+});
+
+UserSchema.methods.isCorrectPassword = function(password, callback) {
+  bcrypt.compare(pasword, this.password, function(err, same){
+    if (err) {
+      callback(err);
+    } else {
+      callback(err,same);
+    }
+  });
+}
 // This creates our model from the above schema, using mongoose's model method
 var User = mongoose.model("User", UserSchema);
 

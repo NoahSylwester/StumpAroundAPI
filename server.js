@@ -3,7 +3,9 @@ const logger = require("morgan");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const moment = require('moment');
-
+const User = require('./models/User.js');
+const secret = 'mysecretssh';
+const jwt = require('jsonwebtoken');
 // Require all models
 var db = require("./models");
 
@@ -26,6 +28,23 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/StumpAround"
 // // Connect to the Mongo DB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
+// POST route to register a user
+app.post('/api/register', function(req, res){
+    const {email, password} = req.body;
+    const user = new User({ email,password });
+    user.save(function(err) {
+        if (err) {
+            res.status(500)
+            .send("error registering new user try again");
+        } else {
+            res.status(200).send("welcome to stumparound")
+        }
+    });
+});
+
+app.post('/api/authenticate', function(req, res) {
+    const { email, password} = req.body;
+})
 //post route to add hikes to database from API
 app.post("/hikes", function (req, res) {
     axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=&key=200649274-302d66556efb2a72c44c396694a27540')
@@ -152,13 +171,13 @@ app.post("/comment", function (req, res) {
     db.Comment.create(req.body)
         .then(function (commentData) {
             console.log(commentData);
-            db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id }}, { new: true })
-            .then((result) => console.log(result));
-            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id }}, { new: true })
-            .then((result) => console.log(result));
+            db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
+            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
             res.json(commentData);
         })
-        .catch(function(err) {
+        .catch(function (err) {
             consol.log(err);
         })
 })
@@ -166,40 +185,40 @@ app.post("/comment", function (req, res) {
 //delete a comment
 app.delete("/commentdelete", function (req, res) {
     console.log(req.body);
-    db.Comment.findOne({ 
-        _id: req.body.id })
-    .then(function (commentData) {
-        console.log(commentData);
-        db.User.findOne({
-            _id: req.body.user
-        })
-        .then(function (userData) {
-            if (userData._id.equals(commentData.users)) {
-                db.Comment.deleteOne({ _id: req.body.id})
-                .then(function (commentDelete) {
-                    console.log("comment deleted");
-                    res.json(commentDelete.hikes);
+    db.Comment.findOne({
+        _id: req.body.id
+    })
+        .then(function (commentData) {
+            console.log(commentData);
+            db.User.findOne({
+                _id: req.body.user
+            })
+                .then(function (userData) {
+                    if (userData._id.equals(commentData.users)) {
+                        db.Comment.deleteOne({ _id: req.body.id })
+                            .then(function (commentDelete) {
+                                console.log("comment deleted");
+                                res.json(commentDelete.hikes);
+                            })
+                    }
+                    else {
+                        res.json("You don't have permissions to delete this.")
+                    }
                 })
-            }
-            else {
-                res.json("You don't have permissions to delete this.")
-            }
+
         })
-        
-    }) 
 });
 
 app.post("/", function (req, res) {
     res.json('POST');
-});
-
-// Start the server
-app.listen(PORT, function () {
-    console.log("App running on port " + PORT + "!");
 });
 app.post("/login", function (req, res) {
     res.json('POST login');
 });
 app.post("/signup", function (req, res) {
     res.json('POST signup');
+});
+// Start the server
+app.listen(PORT, function () {
+    console.log("App running on port " + PORT + "!");
 });
