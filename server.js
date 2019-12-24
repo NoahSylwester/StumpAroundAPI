@@ -168,7 +168,7 @@ app.post("/favorite", function (req, res) {
     let userId = req.body.userId;
     let hikeId = req.body.hikeId;
     db.User.findOneAndUpdate(
-        { userId: userId },
+        { _id: userId },
         { $push: { hikes: hikeId } },
         { new: true }
     )
@@ -184,7 +184,7 @@ app.delete("/favorite", function (req, res) {
     let userId = req.body.userId;
     let hikeId = req.body.hikeId;
     db.User.findOneAndUpdate(
-        { userId: userId },
+        { _id: userId },
         { $pull: { hikes: hikeId } },
         { new: true }
     )
