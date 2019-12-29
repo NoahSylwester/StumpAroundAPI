@@ -6,6 +6,8 @@ const moment = require('moment');
 const User = require('./models/User.js');
 const secret = 'mysecretssh';
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const withAuth = require('./middleware');
 // Require all models
 var db = require("./models");
 
@@ -13,7 +15,7 @@ const PORT = process.env.PORT || 8080;
 
 // Initialize Express
 const app = express();
-
+app.use(cookieParser());
 // Configure middleware
 
 // Use morgan logger for logging requests
@@ -29,21 +31,56 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/StumpAround"
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 // POST route to register a user
-app.post('/api/register', function(req, res){
-    const {email, password} = req.body;
-    const user = new User({ email,password });
-    user.save(function(err) {
+app.post('/api/register', function (req, res) {
+    const { email, password } = req.body;
+    const user = new User({ email, password });
+    user.save(function (err) {
         if (err) {
             res.status(500)
-            .send("error registering new user try again");
+                .send("error registering new user try again");
         } else {
             res.status(200).send("welcome to stumparound")
         }
     });
 });
 
-app.post('/api/authenticate', function(req, res) {
-    const { email, password} = req.body;
+app.post('/api/authenticate', function (req, res) {
+    const { email, password } = req.body;
+    User.findOne({ email }, function (err, user) {
+        if (err) {
+            console.error(err);
+            res.status(500)
+                .json({
+                    error: 'Internal error try again'
+                });
+        } else if (!user) {
+            res.status(401)
+                .json({
+                    error: 'Incorrect email or password'
+                });
+        } else {
+            user.isCorrectPassword(password, function (err, same) {
+                if (err) {
+                    res.status(500)
+                        .json({
+                            error: 'Internal error try again'
+                        });
+                } else if (!same) {
+                    res.status(401)
+                        .json({
+                            error: 'Incorrect email or password'
+                        });
+                } else {
+                    const payload = { email };
+                    const token = jwt.sign(payload, secret, {
+                        expiresIn: '1h'
+                    });
+                    res.cookie('token', token, { httpOnly: true })
+                        .sendStatus(200);
+                }
+            })
+        }
+    })
 })
 //post route to add hikes to database from API
 app.post("/hikes", function (req, res) {
@@ -135,7 +172,13 @@ app.get("/user/:username", function (req, res) {
             res.json(err);
         });
 });
-
+app.get('/api/secret', withAuth, function(req, res) {
+    res.send('The password is potato');
+  });
+ // route to ckeck the token
+  app.get('/checkToken', withAuth, function(req, res) {
+    res.sendStatus(200);
+  });
 //route to update a user's bio
 app.put("/bio", function (req, res) {
     db.User.findOneAndUpdate({ name: req.body.name }, { bio: req.body.bio })

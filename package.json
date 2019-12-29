@@ -1,7 +1,7 @@
 {
   "name": "stumparoundapi",
   "version": "1.0.0",
-  "description": "",
+  "description": "This is the API for the StumpAround app, hosted on Heroku.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,10 +19,13 @@
   "homepage": "https://github.com/NoahSylwester/StumpAroundAPI#readme",
   "dependencies": {
     "axios": "^0.19.0",
+    "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",
     "mongoose": "^5.7.13",
-    "morgan": "^1.9.1"
-  }
+    "morgan": "^1.9.1",
+    "python": "0.0.4"
+  },
+  "devDependencies": {}
 }
