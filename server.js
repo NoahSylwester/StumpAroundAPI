@@ -28,7 +28,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 //post route to add hikes to database from API
 app.post("/hikes", function (req, res) {
-    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=&key=200649274-302d66556efb2a72c44c396694a27540')
+    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=500&key=200649274-302d66556efb2a72c44c396694a27540')
         .then(function (response) {
             // console.log(response.data.trails);
             let trailsData = response.data.trails;
