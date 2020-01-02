@@ -28,7 +28,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 //post route to add hikes to database from API
 app.post("/hikes", function (req, res) {
-    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=&key=200649274-302d66556efb2a72c44c396694a27540')
+    axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=500&key=200649274-302d66556efb2a72c44c396694a27540')
         .then(function (response) {
             // console.log(response.data.trails);
             let trailsData = response.data.trails;
@@ -38,8 +38,10 @@ app.post("/hikes", function (req, res) {
                     name: trailsData[i].name,
                     location: trailsData[i].location,
                     summary: trailsData[i].summary,
-                    photo: trailsData[i].imgSmall,
-                    length: trailsData[i].length
+                    photo: trailsData[i].imgMedium,
+                    length: trailsData[i].length,
+                    latitude: trailsData[i].longitude,
+                    longitude: trailsData[i].longitude,     
                 })
                     .catch(function (err) {
                         if (err.errmsg.substr(0, 6) === "E11000") {
@@ -169,7 +171,7 @@ app.post("/favorite", function (req, res) {
     let hikeId = req.body.hikeId;
     db.User.findOneAndUpdate(
         { _id: userId },
-        { $push: { hikes: hikeId } },
+        { $addToSet: { hikes: hikeId } },
         { new: true }
     )
     .then(function (userRecord) {
