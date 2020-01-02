@@ -38,8 +38,10 @@ app.post("/hikes", function (req, res) {
                     name: trailsData[i].name,
                     location: trailsData[i].location,
                     summary: trailsData[i].summary,
-                    photo: trailsData[i].imgSmall,
-                    length: trailsData[i].length
+                    photo: trailsData[i].imgMedium,
+                    length: trailsData[i].length,
+                    latitude: trailsData[i].longitude,
+                    longitude: trailsData[i].longitude,     
                 })
                     .catch(function (err) {
                         if (err.errmsg.substr(0, 6) === "E11000") {
@@ -169,7 +171,7 @@ app.post("/favorite", function (req, res) {
     let hikeId = req.body.hikeId;
     db.User.findOneAndUpdate(
         { _id: userId },
-        { $push: { hikes: hikeId } },
+        { $addToSet: { hikes: hikeId } },
         { new: true }
     )
     .then(function (userRecord) {

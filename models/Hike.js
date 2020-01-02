@@ -21,6 +21,14 @@ var HikeSchema = new Schema({
     required: true,
     default: "No location info available"
   },
+  latitude: {
+    type: Number,
+    required: true,
+  },
+  longitude: {
+    type: Number,
+    required: true,
+  },
   summary: {
     type: String,
     required: true,
