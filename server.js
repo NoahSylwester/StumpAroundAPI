@@ -76,7 +76,7 @@ app.post('/api/authenticate', function (req, res) {
                     const token = jwt.sign(payload, secret, {
                         expiresIn: '1h'
                     });
-                    res.json({token})
+                    res.json({token, userId: user._id})
                 }
             })
         }

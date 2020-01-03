@@ -29,12 +29,12 @@ const UserSchema = new mongoose.Schema({
   },
   photo: {
     type: String,
-    required: false,
+    required: true,
     default: "https://images.unsplash.com/photo-1492133969098-09ba49699f47?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1789&q=80",
   },
   bio: {
     type: String,
-    required: false,
+    required: true,
     default: "No bio information yet.",
   },
   // `note` is an object that stores a Note id
