@@ -32,8 +32,8 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
 // POST route to register a user
 app.post('/api/register', function (req, res) {
-    const { email, password } = req.body;
-    const user = new User({ email, password });
+    const { email, password, name } = req.body;
+    const user = new User({ email, password, name });
     user.save(function (err) {
         if (err) {
             res.status(500)
@@ -75,8 +75,7 @@ app.post('/api/authenticate', function (req, res) {
                     const token = jwt.sign(payload, secret, {
                         expiresIn: '1h'
                     });
-                    res.cookie('token', token, { httpOnly: true })
-                        .sendStatus(200);
+                    res.json({token})
                 }
             })
         }
@@ -137,25 +136,25 @@ app.get("/hike/:id", function (req, res) {
 });
 
 //post route to add a user to the database
-app.post("/user/add", function (req, res) {
-    console.log("post user add", req.body);
-    let name = req.body.name;
-    db.User.find({ name: name }, { name: 1 }).limit(1)
-        .then(function (userRecords) {
-            console.log(userRecords);
-            if (userRecords.length) {
-                console.log("user exists already; cannot add user");
-            }
-            else {
-                console.log("new user; adding to database");
-                db.User.create({
-                    name: req.body.name,
-                    password: req.body.password,
-                    email: req.body.email
-                })
-            }
-        })
-});
+// app.post("/user/add", function (req, res) {
+//     console.log("post user add", req.body);
+//     let name = req.body.name;
+//     db.User.find({ name: name }, { name: 1 }).limit(1)
+//         .then(function (userRecords) {
+//             console.log(userRecords);
+//             if (userRecords.length) {
+//                 console.log("user exists already; cannot add user");
+//             }
+//             else {
+//                 console.log("new user; adding to database");
+//                 db.User.create({
+//                     name: req.body.name,
+//                     password: req.body.password,
+//                     email: req.body.email
+//                 })
+//             }
+//         })
+// });
 
 //get route to get only one user's data
 app.get("/user/:username", function (req, res) {
@@ -180,10 +179,11 @@ app.get('/api/secret', withAuth, function(req, res) {
     res.sendStatus(200);
   });
 //route to update a user's bio
-app.put("/bio", function (req, res) {
-    db.User.findOneAndUpdate({ name: req.body.name }, { bio: req.body.bio })
+app.put("/bio", withAuth, function (req, res) {
+    console.log("bio route whatever")
+    db.User.findOneAndUpdate({ email: req.email }, { bio: req.body.bio })
         .then(function (updateBio) {
-            db.User.findOne({ name: req.body.name })
+            db.User.findOne({ email: req.email })
                 .then(function (updatedProfile) {
                     console.log("bio updated!");
                     res.json(updatedProfile);
