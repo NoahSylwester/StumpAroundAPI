@@ -1,9 +1,14 @@
+require('dotenv').config();
 const express = require("express");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const moment = require('moment');
-
+const User = require('./models/User.js');
+const secret = process.env.SECRET;
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const withAuth = require('./middleware');
 // Require all models
 var db = require("./models");
 
@@ -11,7 +16,7 @@ const PORT = process.env.PORT || 8080;
 
 // Initialize Express
 const app = express();
-
+app.use(cookieParser());
 // Configure middleware
 
 // Use morgan logger for logging requests
@@ -26,6 +31,57 @@ const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/StumpAround"
 // // Connect to the Mongo DB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
 
+// POST route to register a user
+app.post('/api/register', function (req, res) {
+    const { email, password, name } = req.body;
+    const user = new User({ email, password, name });
+    user.save(function (err) {
+        if (err) {
+            res.status(500)
+                .send("error registering new user try again");
+        } else {
+            res.status(200).send("welcome to stumparound")
+        }
+    });
+});
+
+app.post('/api/authenticate', function (req, res) {
+    const { email, password } = req.body;
+    User.findOne({ email }, function (err, user) {
+        if (err) {
+            console.error(err);
+            res.status(500)
+                .json({
+                    error: 'Internal error try again'
+                });
+        } else if (!user) {
+            res.status(401)
+                .json({
+                    error: 'Incorrect email or password'
+                });
+        } else {
+            user.isCorrectPassword(password, function (err, same) {
+                if (err) {
+                    res.status(500)
+                        .json({
+                            error: 'Internal error try again'
+                        });
+                } else if (!same) {
+                    res.status(401)
+                        .json({
+                            error: 'Incorrect email or password'
+                        });
+                } else {
+                    const payload = { email };
+                    const token = jwt.sign(payload, secret, {
+                        expiresIn: '1h'
+                    });
+                    res.json({token, userId: user._id})
+                }
+            })
+        }
+    })
+})
 //post route to add hikes to database from API
 app.post("/hikes", function (req, res) {
     axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=500&key=200649274-302d66556efb2a72c44c396694a27540')
@@ -83,25 +139,25 @@ app.get("/hike/:id", function (req, res) {
 });
 
 //post route to add a user to the database
-app.post("/user/add", function (req, res) {
-    console.log("post user add", req.body);
-    let name = req.body.name;
-    db.User.find({ name: name }, { name: 1 }).limit(1)
-        .then(function (userRecords) {
-            console.log(userRecords);
-            if (userRecords.length) {
-                console.log("user exists already; cannot add user");
-            }
-            else {
-                console.log("new user; adding to database");
-                db.User.create({
-                    name: req.body.name,
-                    password: req.body.password,
-                    email: req.body.email
-                })
-            }
-        })
-});
+// app.post("/user/add", function (req, res) {
+//     console.log("post user add", req.body);
+//     let name = req.body.name;
+//     db.User.find({ name: name }, { name: 1 }).limit(1)
+//         .then(function (userRecords) {
+//             console.log(userRecords);
+//             if (userRecords.length) {
+//                 console.log("user exists already; cannot add user");
+//             }
+//             else {
+//                 console.log("new user; adding to database");
+//                 db.User.create({
+//                     name: req.body.name,
+//                     password: req.body.password,
+//                     email: req.body.email
+//                 })
+//             }
+//         })
+// });
 
 //get route to get only one user's data
 app.get("/user/:username", function (req, res) {
@@ -118,12 +174,19 @@ app.get("/user/:username", function (req, res) {
             res.json(err);
         });
 });
-
+app.get('/api/secret', withAuth, function(req, res) {
+    res.send('YES');
+  });
+ // route to ckeck the token
+  app.get('/checkToken', withAuth, function(req, res) {
+    res.sendStatus(200);
+  });
 //route to update a user's bio
-app.put("/bio", function (req, res) {
-    db.User.findOneAndUpdate({ name: req.body.name }, { bio: req.body.bio })
+app.put("/bio", withAuth, function (req, res) {
+    console.log("bio route whatever")
+    db.User.findOneAndUpdate({ email: req.email }, { bio: req.body.bio })
         .then(function (updateBio) {
-            db.User.findOne({ name: req.body.name })
+            db.User.findOne({ email: req.email })
                 .then(function (updatedProfile) {
                     console.log("bio updated!");
                     res.json(updatedProfile);
@@ -154,13 +217,13 @@ app.post("/comment", function (req, res) {
     db.Comment.create(req.body)
         .then(function (commentData) {
             console.log(commentData);
-            db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id }}, { new: true })
-            .then((result) => console.log(result));
-            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id }}, { new: true })
-            .then((result) => console.log(result));
+            db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
+            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
             res.json(commentData);
         })
-        .catch(function(err) {
+        .catch(function (err) {
             consol.log(err);
         })
 })
@@ -201,33 +264,39 @@ app.delete("/favorite", function (req, res) {
 //delete a comment
 app.delete("/commentdelete", function (req, res) {
     console.log(req.body);
-    db.Comment.findOne({ 
-        _id: req.body.id })
-    .then(function (commentData) {
-        console.log(commentData);
-        db.User.findOne({
-            _id: req.body.user
-        })
-        .then(function (userData) {
-            if (userData._id.equals(commentData.users)) {
-                db.Comment.deleteOne({ _id: req.body.id})
-                .then(function (commentDelete) {
-                    console.log("comment deleted");
-                    res.json(commentDelete.hikes);
+    db.Comment.findOne({
+        _id: req.body.id
+    })
+        .then(function (commentData) {
+            console.log(commentData);
+            db.User.findOne({
+                _id: req.body.user
+            })
+                .then(function (userData) {
+                    if (userData._id.equals(commentData.users)) {
+                        db.Comment.deleteOne({ _id: req.body.id })
+                            .then(function (commentDelete) {
+                                console.log("comment deleted");
+                                res.json(commentDelete.hikes);
+                            })
+                    }
+                    else {
+                        res.json("You don't have permissions to delete this.")
+                    }
                 })
-            }
-            else {
-                res.json("You don't have permissions to delete this.")
-            }
+
         })
-        
-    }) 
 });
 
 app.post("/", function (req, res) {
     res.json('POST');
 });
-
+app.post("/login", function (req, res) {
+    res.json('POST login');
+});
+app.post("/signup", function (req, res) {
+    res.json('POST signup');
+});
 // Start the server
 app.listen(PORT, function () {
     console.log("App running on port " + PORT + "!");
