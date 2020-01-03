@@ -44,6 +44,10 @@ const UserSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: "Comment"
   }],
+  profileComments: [{
+    type: Schema.Types.ObjectId,
+    ref: "Comment"
+  }],
   hikes: [{
     type: Schema.Types.ObjectId,
     ref: "Hike"
