@@ -1,10 +1,11 @@
+require('dotenv').config();
 const express = require("express");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const moment = require('moment');
 const User = require('./models/User.js');
-const secret = 'mysecretssh';
+const secret = process.env.SECRET;
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware');
@@ -172,7 +173,7 @@ app.get("/user/:username", function (req, res) {
         });
 });
 app.get('/api/secret', withAuth, function(req, res) {
-    res.send('The password is potato');
+    res.send('YES');
   });
  // route to ckeck the token
   app.get('/checkToken', withAuth, function(req, res) {

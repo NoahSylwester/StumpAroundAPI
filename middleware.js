@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const secret = 'mysecretssh';
+const secret = process.env.SECRET;
 
 const withAuth = function(req, res, next) {
   const token = 
