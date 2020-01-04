@@ -38,9 +38,9 @@ app.post('/api/register', function (req, res) {
     user.save(function (err) {
         if (err) {
             res.status(500)
-                .send("error registering new user try again");
+                .json({ error: 0 });
         } else {
-            res.status(200).send("welcome to stumparound")
+            res.status(200).json({ success: 1 })
         }
     });
 });
