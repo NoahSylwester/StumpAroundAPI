@@ -172,6 +172,12 @@ app.get("/user/:username", function (req, res) {
                 path: 'user'
             }
         })
+        .populate({
+            path: "friends",
+            populate: {
+                path: 'user'
+            }
+        })
         .populate("hikes")
         .then(function (userRecord) {
             res.json(userRecord);
@@ -180,6 +186,7 @@ app.get("/user/:username", function (req, res) {
             res.json(err);
         });
 });
+
 app.get('/api/secret', withAuth, function(req, res) {
     res.send('YES');
   });
