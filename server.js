@@ -166,6 +166,12 @@ app.get("/user/:username", function (req, res) {
         name: name
     })
         .populate("comments")
+        .populate({
+            path: "profileComments",
+            populate: {
+                path: 'user'
+            }
+        })
         .populate("hikes")
         .then(function (userRecord) {
             res.json(userRecord);
@@ -224,7 +230,7 @@ app.post("/comment", function (req, res) {
             res.json(commentData);
         })
         .catch(function (err) {
-            consol.log(err);
+            console.log(err);
         })
 })
 

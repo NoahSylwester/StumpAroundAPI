@@ -17,10 +17,14 @@ var CommentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User"
   },
+  profile: {
+    type: Schema.Types.ObjectId,
+    ref: "User"
+  },
   hike: {
     type: Schema.Types.ObjectId,
     ref: "Hike"
-  }
+  },
 });
 
 // This creates our model from the above schema, using mongoose's model method
