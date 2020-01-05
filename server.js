@@ -246,12 +246,27 @@ app.put("/photo", function (req, res) {
         })
     })
     
-//route to add a comment
+//route to add a hike comment
 app.post("/comment", function (req, res) {
     db.Comment.create(req.body)
     .then(function (commentData) {
             console.log(commentData);
             db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
+                db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
+                res.json(commentData);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+    })
+
+app.post("/profileComment", function (req, res) {
+    db.Comment.create({...req.body, profile: req.body.hike})
+    .then(function (commentData) {
+            console.log(commentData);
+            db.User.findOneAndUpdate({ _id: req.body.hike }, { $push: { profileComments: commentData._id } }, { new: true })
                 .then((result) => console.log(result));
                 db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
                 .then((result) => console.log(result));
