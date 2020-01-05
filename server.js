@@ -145,7 +145,8 @@ app.get("/user/:username", function (req, res) {
     db.User.findOne({
         name: name
     })
-    .populate("comments")
+        .select('password')
+        .populate("comments")
         .populate({
             path: "profileComments",
             populate: {
@@ -154,6 +155,46 @@ app.get("/user/:username", function (req, res) {
         })
         .populate({
             path: "friends",
+            populate: {
+                path: 'user'
+            }
+        })
+        .populate("hikes")
+        .then(function (userRecord) {
+            res.json(userRecord);
+        })
+        .catch(function (err) {
+            res.json(err);
+        });
+});
+
+//get route to get only one user's data
+app.get("/user/secure", withAuth, function (req, res) {
+    db.User.findOne({
+        email: req.email
+    })
+        .select('-password')
+        .populate("comments")
+        .populate({
+            path: "profileComments",
+            populate: {
+                path: 'user'
+            }
+        })
+        .populate({
+            path: "friends",
+            populate: {
+                path: 'user'
+            }
+        })
+        .populate({
+            path: "sentRequests",
+            populate: {
+                path: 'user'
+            }
+        })
+        .populate({
+            path: "receivedRequests",
             populate: {
                 path: 'user'
             }
