@@ -138,26 +138,6 @@ app.get("/hike/:id", function (req, res) {
         });
 });
 
-//post route to add a user to the database
-// app.post("/user/add", function (req, res) {
-//     console.log("post user add", req.body);
-//     let name = req.body.name;
-//     db.User.find({ name: name }, { name: 1 }).limit(1)
-//         .then(function (userRecords) {
-//             console.log(userRecords);
-//             if (userRecords.length) {
-//                 console.log("user exists already; cannot add user");
-//             }
-//             else {
-//                 console.log("new user; adding to database");
-//                 db.User.create({
-//                     name: req.body.name,
-//                     password: req.body.password,
-//                     email: req.body.email
-//                 })
-//             }
-//         })
-// });
 
 //get route to get only one user's data
 app.get("/user/:username", function (req, res) {
@@ -230,33 +210,33 @@ app.get("/user/secure", withAuth, function (req, res) {
 
 app.get('/api/secret', withAuth, function(req, res) {
     res.send('YES');
-  });
+});
  // route to ckeck the token
-  app.get('/checkToken', withAuth, function(req, res) {
+ app.get('/checkToken', withAuth, function(req, res) {
     res.sendStatus(200);
-  });
+});
 //route to update a user's bio
 app.put("/bio", withAuth, function (req, res) {
     console.log("bio route whatever")
     db.User.findOneAndUpdate({ email: req.email }, { bio: req.body.bio })
-        .then(function (updateBio) {
+    .then(function (updateBio) {
             db.User.findOne({ email: req.email })
-                .then(function (updatedProfile) {
-                    console.log("bio updated!");
+            .then(function (updatedProfile) {
+                console.log("bio updated!");
                     res.json(updatedProfile);
                 })
                 .catch(function (err) {
                     res.json(err);
                 });
-        })
+            })
 })
 
 //route to update a user's photo
 app.put("/photo", function (req, res) {
     db.User.findOneAndUpdate({ name: req.body.name }, { photo: req.body.photo })
-        .then(function (updatePhoto) {
-            db.User.findOne({ name: req.body.name })
-                .then(function (updatedProfile) {
+    .then(function (updatePhoto) {
+        db.User.findOne({ name: req.body.name })
+        .then(function (updatedProfile) {
                     console.log("photo updated!");
                     res.json(updatedProfile);
                 })
@@ -264,25 +244,25 @@ app.put("/photo", function (req, res) {
                     res.json(err);
                 });
         })
-})
-
+    })
+    
 //route to add a comment
 app.post("/comment", function (req, res) {
     db.Comment.create(req.body)
-        .then(function (commentData) {
+    .then(function (commentData) {
             console.log(commentData);
             db.Hike.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id } }, { new: true })
                 .then((result) => console.log(result));
-            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
+                db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
                 .then((result) => console.log(result));
-            res.json(commentData);
+                res.json(commentData);
         })
         .catch(function (err) {
             console.log(err);
         })
-})
+    })
 
-//route to add a hike to favorites
+    //route to add a hike to favorites
 app.post("/favorite", function (req, res) {
     let userId = req.body.userId;
     let hikeId = req.body.hikeId;
@@ -306,10 +286,10 @@ app.delete("/favorite", function (req, res) {
         { _id: userId },
         { $pull: { hikes: hikeId } },
         { new: true }
-    )
-    .then(function (userRecord) {
-        res.json(userRecord);
-    })
+        )
+        .then(function (userRecord) {
+            res.json(userRecord);
+        })
     .catch(function (err) {
         res.json(err);
     });
@@ -333,16 +313,16 @@ app.delete("/commentdelete", function (req, res) {
                                 console.log("comment deleted");
                                 res.json(commentDelete.hikes);
                             })
-                    }
+                        }
                     else {
                         res.json("You don't have permissions to delete this.")
                     }
                 })
 
-        })
-});
+            })
+        });
 
-app.post("/", function (req, res) {
+        app.post("/", function (req, res) {
     res.json('POST');
 });
 app.post("/login", function (req, res) {
@@ -355,3 +335,24 @@ app.post("/signup", function (req, res) {
 app.listen(PORT, function () {
     console.log("App running on port " + PORT + "!");
 });
+
+    //post route to add a user to the database
+    // app.post("/user/add", function (req, res) {
+    //     console.log("post user add", req.body);
+    //     let name = req.body.name;
+    //     db.User.find({ name: name }, { name: 1 }).limit(1)
+    //         .then(function (userRecords) {
+    //             console.log(userRecords);
+    //             if (userRecords.length) {
+    //                 console.log("user exists already; cannot add user");
+    //             }
+    //             else {
+    //                 console.log("new user; adding to database");
+    //                 db.User.create({
+    //                     name: req.body.name,
+    //                     password: req.body.password,
+    //                     email: req.body.email
+    //                 })
+    //             }
+    //         })
+    // });
