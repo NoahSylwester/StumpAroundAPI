@@ -169,7 +169,7 @@ app.get("/user/:username", function (req, res) {
 });
 
 //get route to get only one user's data
-app.get("/user/secure", withAuth, function (req, res) {
+app.post("/user/secure", withAuth, function (req, res) {
     db.User.findOne({
         email: req.email
     })
