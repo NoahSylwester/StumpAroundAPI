@@ -165,7 +165,7 @@ app.get("/user/:username", function (req, res) {
     db.User.findOne({
         name: name
     })
-        .select('password')
+        .select('-password')
         .populate("comments")
         .populate({
             path: "profileComments",
