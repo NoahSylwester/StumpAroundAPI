@@ -240,6 +240,7 @@ app.get('/photo/:imgId', (req, res) => {
 })
 
 const handleError = (err, res) => {
+    console.log('in hndlerrfn', err);
     res
       .status(500)
       .contentType("text/plain")
