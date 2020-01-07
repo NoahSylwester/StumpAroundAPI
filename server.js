@@ -4,6 +4,9 @@ const logger = require("morgan");
 const mongoose = require("mongoose");
 const axios = require("axios");
 const moment = require('moment');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 const User = require('./models/User.js');
 const secret = process.env.SECRET;
 const jwt = require('jsonwebtoken');
@@ -231,19 +234,47 @@ app.put("/bio", withAuth, function (req, res) {
             })
 })
 
+// route to serve uploaded photos
+app.get('/photo/:imgId', (req, res) => {
+    res.sendFile(__dirname + `/uploads/images/${req.params.imgId}.jpg`);
+})
+
+const handleError = (err, res) => {
+    res
+      .status(500)
+      .contentType("text/plain")
+      .end("Oops! Something went wrong!");
+  };
+
+const upload = multer({dest: __dirname + '/uploads/temp'});
 //route to update a user's photo
-app.put("/photo", function (req, res) {
-    db.User.findOneAndUpdate({ name: req.body.name }, { photo: req.body.photo })
-    .then(function (updatePhoto) {
-        db.User.findOne({ name: req.body.name })
-        .then(function (updatedProfile) {
-                    console.log("photo updated!");
-                    res.json(updatedProfile);
-                })
-                .catch(function (err) {
-                    res.json(err);
+app.post("/profileImageUpload", upload.single('file'), function (req, res) {
+    if (!req.file) {
+        console.log("No file received");
+        res
+        .status(403)
+        .contentType("text/plain")
+        .end("No file received");
+    } else {
+        console.log('file received');
+        db.User.findOne({ email: req.email })
+        .then((foundProfile) => {
+            db.User.findOneAndUpdate({ email: req.email }, { photo: `http://stump-around.herokuapp.com/photo/${foundProfile._id}` })
+        })
+        .then(
+            (updatedProfile) => {
+                const tempPath = req.file.path;
+                const targetPath = path.join(__dirname, `./uploads/images/${updatedProfile._id}.jpg`);
+                fs.rename(tempPath, targetPath, err => {
+                    if (err) return handleError(err, res);
+            
+                    res
+                    .status(200)
+                    .contentType("text/plain")
+                    .end("File uploaded!");
                 });
         })
+      }
     })
     
 //route to add a hike comment
