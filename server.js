@@ -257,9 +257,11 @@ app.post("/profileImageUpload", upload.single('file'), function (req, res) {
         .end("No file received");
     } else {
         console.log('file received');
-        db.User.findOne({ email: req.email })
+        return db.User.findOne({
+            email: req.email
+        })
         .then((foundProfile) => {
-            db.User.findOneAndUpdate({ email: req.email }, { photo: `http://stump-around.herokuapp.com/photo/${foundProfile._id}` })
+            return db.User.findOneAndUpdate({ email: req.email }, { photo: `http://stump-around.herokuapp.com/photo/${foundProfile._id}` })
         })
         .then(
             (updatedProfile) => {
@@ -271,7 +273,7 @@ app.post("/profileImageUpload", upload.single('file'), function (req, res) {
                     res
                     .status(200)
                     .contentType("text/plain")
-                    .end("File uploaded!");
+                    .json(updatedProfile);
                 });
         })
       }
