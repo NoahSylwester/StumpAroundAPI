@@ -250,7 +250,7 @@ const handleError = (err, res) => {
 const upload = multer({dest: __dirname + '/uploads/temp'});
 // const upload = multer({dest: '/uploads/temp'});
 //route to update a user's photo
-app.post("/profileImageUpload", upload.single('file'), function (req, res) {
+app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, res) {
     if (!req.file) {
         console.log("No file received");
         res
