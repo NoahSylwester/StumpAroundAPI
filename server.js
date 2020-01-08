@@ -264,7 +264,7 @@ app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, 
         })
         .then((foundProfile) => {
             console.log('found:', foundProfile);
-            return db.User.findOneAndUpdate({ email: req.email }, { photo: `http://stump-around.herokuapp.com/photo/${foundProfile._id}` })
+            return db.User.findOneAndUpdate({ email: req.email }, { photo: `http://stump-around.herokuapp.com/photo/${foundProfile._id}` }, { new: true })
         })
         .then(
             (updatedProfile) => {
