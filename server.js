@@ -6,6 +6,7 @@ const axios = require("axios");
 const moment = require('moment');
 const multer = require('multer');
 const fs = require('fs');
+const uuidv1 = require('uuid/v1');
 const path = require('path');
 const User = require('./models/User.js');
 const secret = process.env.SECRET;
@@ -14,6 +15,15 @@ const cookieParser = require('cookie-parser');
 const withAuth = require('./middleware');
 // Require all models
 var db = require("./models");
+const handleError = (err, res) => {
+    console.log('in hndlerrfn', err);
+    res
+      .status(500)
+      .contentType("text/plain")
+      .end("Oops! Something went wrong!");
+  };
+
+const upload = multer({dest: __dirname + '/uploads/temp'});
 
 const PORT = process.env.PORT || 8080;
 
@@ -141,6 +151,70 @@ app.get("/hike/:id", function (req, res) {
         });
 });
 
+//post route to add stump to database
+app.post("/stumps", withAuth, upload.single('file'), function (req, res) {
+    const hash = uuidv1();
+    let userId;
+    if (!req.file) {
+        console.log("No photo received");
+        res
+        .status(403)
+        .contentType("text/plain")
+        .end("No photo received");
+    } else {
+        console.log('file received');
+        return db.User.findOne({
+            email: req.email
+        })
+        .then((foundProfile) => {
+            console.log('found:', foundProfile);
+            userId = foundProfile._id;
+            return db.Stump.create({
+                name: req.body.name,
+                summary: req.body.summary,
+                user: foundProfile._id,
+                photo: `http://stump-around.herokuapp.com/photo/${userId}${hash}`,
+                latitude: req.body.latitude,
+                longitude: req.body.longitude,
+            })
+        })
+        .then((createdStump) => {
+                console.log('updated:', createdStump);
+                const tempPath = req.file.path;
+                const targetPath = path.join(__dirname, `./uploads/images/${userId}${hash}.jpg`);
+                fs.rename(tempPath, targetPath, err => {
+                    if (err) return handleError(err, res);
+            
+                    res
+                    .status(200)
+                    // .contentType("text/plain")
+                    .json(createdStump);
+                });
+        })
+        .catch(function (err) {
+                console.log("An error has occurred.");
+        })
+    }
+});
+
+//get call to grab only one hike from database
+app.get("/stump/:id", function (req, res) {
+    console.log("serverside ID is: ", req.params.id);
+    db.Stump.findOne({ _id: req.params.id })
+        .populate({
+            path: "comments",
+            populate: {
+                path: 'user'
+            }
+        })
+        .then(function (stumpRecord) {
+            res.json(stumpRecord);
+        })
+        .catch(function (err) {
+            res.json(err);
+        });
+});
+
 
 //get route to get only one user's data
 app.get("/user/:username", function (req, res) {
@@ -239,15 +313,6 @@ app.get('/photo/:imgId', (req, res) => {
     res.sendFile(__dirname + `/uploads/images/${req.params.imgId}.jpg`);
 })
 
-const handleError = (err, res) => {
-    console.log('in hndlerrfn', err);
-    res
-      .status(500)
-      .contentType("text/plain")
-      .end("Oops! Something went wrong!");
-  };
-
-const upload = multer({dest: __dirname + '/uploads/temp'});
 // const upload = multer({dest: '/uploads/temp'});
 //route to update a user's photo
 app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, res) {
