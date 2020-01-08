@@ -247,7 +247,8 @@ const handleError = (err, res) => {
       .end("Oops! Something went wrong!");
   };
 
-const upload = multer({dest: __dirname + '/uploads/temp'});
+// const upload = multer({dest: __dirname + '/uploads/temp'});
+const upload = multer({dest: '/uploads/temp'});
 //route to update a user's photo
 app.post("/profileImageUpload", upload.single('file'), function (req, res) {
     if (!req.file) {
@@ -269,7 +270,8 @@ app.post("/profileImageUpload", upload.single('file'), function (req, res) {
             (updatedProfile) => {
                 console.log('updated:', updatedProfile);
                 const tempPath = req.file.path;
-                const targetPath = path.join(__dirname, `./uploads/images/${updatedProfile._id}.jpg`);
+                const targetPath = path.join(`./uploads/images/${updatedProfile._id}.jpg`);
+                // const targetPath = path.join(__dirname, `./uploads/images/${updatedProfile._id}.jpg`);
                 fs.rename(tempPath, targetPath, err => {
                     if (err) return handleError(err, res);
             
