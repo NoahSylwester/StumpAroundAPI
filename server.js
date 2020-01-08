@@ -32,7 +32,7 @@ app.use(express.static("public"));
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/StumpAround";
 // // Connect to the Mongo DB
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true });
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useFindAndModify: false });
 
 // POST route to register a user
 app.post('/api/register', function (req, res) {
@@ -240,6 +240,7 @@ app.get('/photo/:imgId', (req, res) => {
 })
 
 const handleError = (err, res) => {
+    console.log('in hndlerrfn', err);
     res
       .status(500)
       .contentType("text/plain")
@@ -261,10 +262,12 @@ app.post("/profileImageUpload", upload.single('file'), function (req, res) {
             email: req.email
         })
         .then((foundProfile) => {
+            console.log('found:', foundProfile);
             return db.User.findOneAndUpdate({ email: req.email }, { photo: `http://stump-around.herokuapp.com/photo/${foundProfile._id}` })
         })
         .then(
             (updatedProfile) => {
+                console.log('updated:', updatedProfile);
                 const tempPath = req.file.path;
                 const targetPath = path.join(__dirname, `./uploads/images/${updatedProfile._id}.jpg`);
                 fs.rename(tempPath, targetPath, err => {
@@ -272,7 +275,7 @@ app.post("/profileImageUpload", upload.single('file'), function (req, res) {
             
                     res
                     .status(200)
-                    .contentType("text/plain")
+                    // .contentType("text/plain")
                     .json(updatedProfile);
                 });
         })
