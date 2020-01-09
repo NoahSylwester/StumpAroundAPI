@@ -24,6 +24,8 @@ const handleError = (err, res) => {
   };
 
 const upload = multer({dest: __dirname + '/uploads/temp'});
+// const storage = multer.memoryStorage()
+// const upload = multer({ storage: storage })
 
 const PORT = process.env.PORT || 8080;
 
@@ -180,22 +182,69 @@ app.post("/stump", withAuth, upload.single('file'), function (req, res) {
         })
         .then((createdStump) => {
                 console.log('updated:', createdStump);
-                const tempPath = req.file.path;
-                const targetPath = path.join(__dirname, `./uploads/images/${userId}${hash}.jpg`);
-                fs.rename(tempPath, targetPath, err => {
-                    if (err) return handleError(err, res);
-            
-                    res
-                    .status(200)
-                    // .contentType("text/plain")
-                    .json(createdStump);
-                });
+                const imageFile = fs.readFileSync(req.file.path);
+                const encode_image = imageFile.toString('base64');
+                  
+                 const finalImg = {
+                      contentType: req.file.mimetype,
+                      image:  new Buffer(encode_image, 'base64')
+                   };
+                db.Image.create(finalImg)
+                .then((image) => {
+                    res.send('end');
+                })
         })
         .catch(function (err) {
                 console.log("An error has occurred.");
         })
     }
 });
+
+//post route to add stump to database
+// app.put("/stump/photo", withAuth, upload.single('file'), function (req, res) {
+//     const hash = uuidv1();
+//     let userId;
+//     if (!req.file) {
+//         console.log("No photo received");
+//         res
+//         .status(403)
+//         .contentType("text/plain")
+//         .end("No photo received");
+//     } else {
+//         console.log('file received');
+//         return db.User.findOne({
+//             email: req.email
+//         })
+//         .then((foundProfile) => {
+//             console.log('found:', foundProfile);
+//             userId = foundProfile._id;
+//             return db.Stump.create({
+//                 name: req.body.name,
+//                 summary: req.body.summary,
+//                 user: foundProfile._id,
+//                 photo: `http://stump-around.herokuapp.com/photo/${userId}${hash}`,
+//                 latitude: req.body.latitude,
+//                 longitude: req.body.longitude,
+//             })
+//         })
+//         .then((createdStump) => {
+//                 console.log('updated:', createdStump);
+//                 const tempPath = req.file.path;
+//                 const targetPath = path.join(__dirname, `./uploads/images/${userId}${hash}.jpg`);
+//                 fs.rename(tempPath, targetPath, err => {
+//                     if (err) return handleError(err, res);
+            
+//                     res
+//                     .status(200)
+//                     // .contentType("text/plain")
+//                     .json(createdStump);
+//                 });
+//         })
+//         .catch(function (err) {
+//                 console.log("An error has occurred.");
+//         })
+//     }
+// });
 
 //get call to get all stumps from database
 app.get("/stumps", function (req, res) {
