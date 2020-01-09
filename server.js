@@ -152,7 +152,7 @@ app.get("/hike/:id", function (req, res) {
 });
 
 //post route to add stump to database
-app.post("/stumps", withAuth, upload.single('file'), function (req, res) {
+app.post("/stump", withAuth, upload.single('file'), function (req, res) {
     const hash = uuidv1();
     let userId;
     if (!req.file) {
@@ -197,7 +197,15 @@ app.post("/stumps", withAuth, upload.single('file'), function (req, res) {
     }
 });
 
-//get call to grab only one hike from database
+//get call to get all stumps from database
+app.get("/stumps", function (req, res) {
+    db.Stump.find({})
+        .then(function (records) {
+            res.json(records);
+        })
+});
+
+//get call to grab only one stump from database
 app.get("/stump/:id", function (req, res) {
     console.log("serverside ID is: ", req.params.id);
     db.Stump.findOne({ _id: req.params.id })
