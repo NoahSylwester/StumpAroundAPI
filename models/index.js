@@ -4,4 +4,6 @@ module.exports = {
     User: require("./User"),
     Comment: require("./Comment"),
     Hike: require('./Hike'),
+    Stump: require('./Stump'),
+    Image: require('./Image'),
   };
