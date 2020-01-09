@@ -372,6 +372,38 @@ app.post("/comment", function (req, res) {
         })
     })
 
+//get call to grab only one hike from database
+app.get("/comment/:id", function (req, res) {
+    console.log("serverside ID is: ", req.params.id);
+    db.Comment.findOne({ _id: req.params.id })
+        .populate({
+            path: "replies",
+            populate: {
+                path: 'user'
+            }
+        })
+        .then(function (commentRecord) {
+            res.json(commentRecord);
+        })
+        .catch(function (err) {
+            res.json(err);
+        });
+});
+
+//route to add a comment reply
+app.post("/reply", function (req, res) {
+    db.Comment.create(req.body)
+    .then(function (commentData) {
+            console.log(commentData);
+            db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
+            .then((result) => console.log(result));
+            res.json(commentData);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+    })
+
 app.post("/profileComment", function (req, res) {
     db.Comment.create({...req.body, profile: req.body.hike})
     .then(function (commentData) {
@@ -387,7 +419,7 @@ app.post("/profileComment", function (req, res) {
         })
     })
 
-    //route to add a hike to favorites
+//route to add a hike to favorites
 app.post("/favorite", function (req, res) {
     let userId = req.body.userId;
     let hikeId = req.body.hikeId;
@@ -447,7 +479,7 @@ app.delete("/commentdelete", function (req, res) {
             })
         });
 
-        app.post("/", function (req, res) {
+app.post("/", function (req, res) {
     res.json('POST');
 });
 app.post("/login", function (req, res) {
