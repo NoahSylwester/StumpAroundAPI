@@ -154,11 +154,11 @@ app.get("/hike/:id", function (req, res) {
 });
 
 app.get('/image/:id', (req, res) => {
-    db.Image.findOne({'_id': req.params.id }, (err, result) => {
-     
+    db.Image.findOne({'_id': req.params.id })
+    .then((result) => {    
         if (err) return console.log(err)
      
-       res.contentType('image/jpeg');
+       res.contentType(result.contentType);
        res.send(result.image.buffer)
        
         
