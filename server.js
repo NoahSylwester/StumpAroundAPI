@@ -153,6 +153,20 @@ app.get("/hike/:id", function (req, res) {
         });
 });
 
+app.get('/image/:id', (req, res) => {
+    const filename = req.params.id;
+     
+    db.Image.findOne({'_id': ObjectId(filename) }, (err, result) => {
+     
+        if (err) return console.log(err)
+     
+       res.contentType('image/jpeg');
+       res.send(result.image.buffer)
+       
+        
+      })
+    })
+
 //post route to add stump to database
 app.post("/stump", withAuth, upload.single('file'), function (req, res) {
     const hash = uuidv1();
