@@ -25,3 +25,9 @@ var ImageSchema = new Schema({
       image: Buffer,
   }
 });
+
+// This creates our model from the above schema, using mongoose's model method
+var Image = mongoose.model("Image", ImageSchema);
+
+// Export the Note model
+module.exports = Image;
