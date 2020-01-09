@@ -25,6 +25,14 @@ var CommentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Hike"
   },
+  stump: {
+    type: Schema.Types.ObjectId,
+    ref: "Stump"
+  },
+  repliedTo: {
+    type: Schema.Types.ObjectId,
+    ref: "Comment"
+  },
   replies: [{
     type: Schema.Types.ObjectId,
     ref: "Comment"
