@@ -171,13 +171,14 @@ app.post("/stump", withAuth, upload.single('file'), function (req, res) {
         .then((foundProfile) => {
             console.log('found:', foundProfile);
             userId = foundProfile._id;
-            return db.Stump.create({
-                name: req.body.name,
-                summary: req.body.summary,
-                user: foundProfile._id,
-                photo: `http://stump-around.herokuapp.com/photo/${userId}${hash}`,
-                latitude: req.body.latitude,
-                longitude: req.body.longitude,
+            return;
+            // return db.Stump.create({
+            //     name: req.body.name,
+            //     summary: req.body.summary,
+            //     user: foundProfile._id,
+            //     photo: `http://stump-around.herokuapp.com/photo/${userId}${hash}`,
+            //     latitude: req.body.latitude,
+            //     longitude: req.body.longitude,
             })
         })
         .then((createdStump) => {
