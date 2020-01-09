@@ -22,7 +22,11 @@ var ImageSchema = new Schema({
   },
   contentType: {
       type: String,
-      image: Buffer,
+      required: true,
+  },
+  image: {
+      type: Buffer,
+      required: true,
   }
 });
 
