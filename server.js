@@ -156,13 +156,14 @@ app.get("/hike/:id", function (req, res) {
 app.get('/image/:id', (req, res) => {
     db.Image.findOne({'_id': req.params.id })
     .then((result) => {    
-        if (err) return console.log(err)
-     
        res.contentType(result.contentType);
        res.send(result.image.buffer)
        
         
       })
+      .catch(function (err) {
+        res.json(err);
+        });
     })
 
 //post route to add stump to database
