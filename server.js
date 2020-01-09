@@ -188,7 +188,7 @@ app.post("/stump", withAuth, upload.single('file'), function (req, res) {
                   
                  const finalImg = {
                       contentType: req.file.mimetype,
-                      image:  new Buffer(encode_image, 'base64')
+                      image:  new Buffer.from(encode_image, 'base64')
                    };
                 db.Image.create(finalImg)
                 .then((image) => {
