@@ -179,7 +179,7 @@ app.post("/stump", withAuth, upload.single('file'), function (req, res) {
             //     photo: `http://stump-around.herokuapp.com/photo/${userId}${hash}`,
             //     latitude: req.body.latitude,
             //     longitude: req.body.longitude,
-            })
+            // })
         })
         .then((createdStump) => {
                 console.log('updated:', createdStump);
