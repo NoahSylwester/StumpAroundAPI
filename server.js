@@ -158,7 +158,7 @@ app.get('/image/:id', (req, res) => {
     .then((result) => {  
         console.log(result);  
        res.type(result.contentType);
-       res.send(Buffer.from(result.image.buffer));
+       res.send(result.image.buffer.toString('base64'));
        
         
       })
