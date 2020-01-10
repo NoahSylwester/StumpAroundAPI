@@ -444,6 +444,22 @@ app.post("/comment", function (req, res) {
         })
     })
 
+//route to add a hike comment
+app.post("stump/comment", function (req, res) {
+    db.Comment.create(req.body)
+    .then(function (commentData) {
+            console.log(commentData);
+            db.Stump.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
+                db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
+                .then((result) => console.log(result));
+                res.json(commentData);
+        })
+        .catch(function (err) {
+            console.log(err);
+        })
+    })
+
 //get call to grab only one hike from database
 app.get("/comment/:id", function (req, res) {
     console.log("serverside ID is: ", req.params.id);
