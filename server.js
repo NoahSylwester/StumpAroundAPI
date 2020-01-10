@@ -155,10 +155,13 @@ app.get("/hike/:id", function (req, res) {
 
 app.get('/image/:id', (req, res) => {
     db.Image.findOne({'_id': req.params.id })
-    .then((result) => {  
-        console.log(result);  
+    .then((result) => {
+        let base64data = result.image.buffer.toString('base64');
+        let buff = new Buffer(base64data, 'base64');
+        let image = buff.toString('ascii');
+        console.log(image);  
        res.type(result.contentType);
-       res.send(DataView(result.image.buffer.toString('base64')));
+       res.send(image);
        
         
       })
