@@ -23,9 +23,9 @@ const handleError = (err, res) => {
       .end("Oops! Something went wrong!");
   };
 
-const upload = multer({dest: __dirname + '/uploads/temp'});
-// const storage = multer.memoryStorage()
-// const upload = multer({ storage: storage })
+// const upload = multer({dest: __dirname + '/uploads/temp'});
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 const PORT = process.env.PORT || 8080;
 
@@ -168,8 +168,6 @@ app.get('/image/:id', (req, res) => {
 
 //post route to add stump to database
 app.post("/stump", withAuth, upload.single('file'), function (req, res) {
-    const hash = uuidv1();
-    let userId;
     if (!req.file) {
         console.log("No photo received");
         res
@@ -196,12 +194,13 @@ app.post("/stump", withAuth, upload.single('file'), function (req, res) {
         })
         .then((createdStump) => {
                 console.log('updated:', createdStump);
-                const imageFile = fs.readFileSync(req.file.path);
-                const encode_image = imageFile.toString('base64');
-                  
+                // const imageFile = fs.readFileSync(req.file.path);
+                // const encode_image = imageFile.toString('base64');
+                console.log(req.file);
+                console.log(req.file.buffer);
                  const finalImg = {
                       contentType: req.file.mimetype,
-                      image:  new Buffer.from(encode_image, 'base64')
+                      image:  req.file.buffer//new Buffer.from(encode_image, 'base64')
                    };
                 db.Image.create(finalImg)
                 .then((image) => {
