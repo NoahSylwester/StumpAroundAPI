@@ -158,7 +158,7 @@ app.get('/image/:id', (req, res) => {
     .then((result) => {  
         console.log(result);  
        res.type(result.contentType);
-       res.end(result.image.buffer, 'binary')
+       res.send(Buffer.from(result.image.buffer));
        
         
       })
