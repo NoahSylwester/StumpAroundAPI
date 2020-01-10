@@ -39,9 +39,7 @@ var StumpSchema = new Schema({
     default: "https://images.unsplash.com/photo-1478954755238-0bb0af1dc326?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=696&q=80",
   },
   tags: {
-    type: [{
-      type: String,
-    }]
+    type: Array,
   },
   user: {
     type: Schema.Types.ObjectId,
