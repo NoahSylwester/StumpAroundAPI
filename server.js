@@ -196,7 +196,8 @@ app.post("/stump", withAuth, upload.single('file'), function (req, res) {
                 console.log('updated:', createdStump);
                 // const imageFile = fs.readFileSync(req.file.path);
                 // const encode_image = imageFile.toString('base64');
-                  
+                console.log(req.file);
+                console.log(req.file.buffer);
                  const finalImg = {
                       contentType: req.file.mimetype,
                       image:  req.file.buffer//new Buffer.from(encode_image, 'base64')
