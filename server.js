@@ -156,19 +156,37 @@ app.get("/hike/:id", function (req, res) {
 app.get('/image/:id', (req, res) => {
     db.Image.findOne({'_id': req.params.id })
     .then((result) => {  
-        console.log(result);  
-       res.type(result.contentType);
-       res.send(result.image.buffer);
-       
-        
+        res.set('Content-Type', result.contentType);
+        res.send(Buffer.from(result.image.buffer)); 
       })
       .catch(function (err) {
         res.json(err);
         });
     })
-
+//AIzaSyCxVNFOHr5A41exxwglh7c4BnKxEa2DoIc
 //post route to add stump to database
-app.post("/stump", withAuth, upload.single('file'), function (req, res) {
+app.post("/stump", withAuth, function(req, res) {
+    db.User.findOne({
+        email: req.email
+    })
+    .then((foundProfile) => {
+        return db.Stump.create({
+                name: req.body.name,
+                summary: req.body.summary,
+                user: foundProfile._id,
+                latitude: req.body.latitude,
+                longitude: req.body.longitude,
+        })
+        .then((newStump) => {
+            res.json(newStump._id);
+        })
+    })
+    .catch(function (err) {
+        console.log(err);
+        res.json({ error: 1 })
+    })
+})
+app.put("/stump/image/:stumpid", withAuth, upload.single('file'), function (req, res) {
     if (!req.file) {
         console.log("No photo received");
         res
@@ -176,40 +194,31 @@ app.post("/stump", withAuth, upload.single('file'), function (req, res) {
         .contentType("text/plain")
         .end("No photo received");
     } else {
-        console.log('file received');
-        return db.User.findOne({
+        db.User.findOne({
             email: req.email
         })
-        .then((foundProfile) => {
-            console.log('found:', foundProfile);
-            userId = foundProfile._id;
-            return;
-            // return db.Stump.create({
-            //     name: req.body.name,
-            //     summary: req.body.summary,
-            //     user: foundProfile._id,
-            //     photo: `http://stump-around.herokuapp.com/photo/${userId}${hash}`,
-            //     latitude: req.body.latitude,
-            //     longitude: req.body.longitude,
-            // })
-        })
-        .then((createdStump) => {
-                console.log('updated:', createdStump);
-                const imageFile = fs.readFileSync(req.file.path);
-                const encode_image = imageFile.toString('base64');
-                // console.log(req.file);
-                // console.log(req.file.buffer);
-                 const finalImg = {
-                      contentType: req.file.mimetype,
-                      image:  new Buffer.from(encode_image, 'base64')
-                   };
-                db.Image.create(finalImg)
-                .then((image) => {
-                    res.send('end');
+        .then((foundUser) => {
+            const imageFile = fs.readFileSync(req.file.path);
+            const encode_image = imageFile.toString('base64');
+            const finalImg = {
+                contentType: req.file.mimetype,
+                image:  new Buffer.from(encode_image, 'base64')
+            };
+            db.Image.create({ ...finalImg, user: foundUser._id})
+            .then((createdImage) => {
+                db.Stump.findOneAndUpdate({
+                    _id: req.params.stumpid
+                }, {
+                    photo: `http://stump-around.herokuapp.com/image/${createdImage._id}`
                 })
+                .then((result) => {
+                    res.json({ success: 1 });
+                })
+            })
         })
         .catch(function (err) {
                 console.log("An error has occurred.");
+                res.json({ error: 1 })
         })
     }
 });
