@@ -24,6 +24,10 @@ var StumpSchema = new Schema({
     type: Number,
     required: true,
   },
+  altitude: {
+    type: Number,
+    required: false,
+  },
   summary: {
     type: String,
     required: true,
@@ -34,9 +38,15 @@ var StumpSchema = new Schema({
     required: true,
     default: "https://images.unsplash.com/photo-1478954755238-0bb0af1dc326?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=696&q=80",
   },
-  // `note` is an object that stores a Note id
-  // The ref property links the ObjectId to the Note model
-  // This allows us to populate the Article with an associated Note
+  tags: {
+    type: [{
+      type: String,
+    }]
+  },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: "User"
+  },
   comments: [{
     type: Schema.Types.ObjectId,
     ref: "Comment"
