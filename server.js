@@ -142,7 +142,8 @@ app.get("/hike/:id", function (req, res) {
         .populate({
             path: "comments",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .then(function (hikeRecord) {
@@ -281,10 +282,12 @@ app.get("/stumps", function (req, res) {
 app.get("/stump/:id", function (req, res) {
     console.log("serverside ID is: ", req.params.id);
     db.Stump.findOne({ _id: req.params.id })
+        .populate('user')
         .populate({
             path: "comments",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .then(function (stumpRecord) {
@@ -307,13 +310,15 @@ app.get("/user/:username", function (req, res) {
         .populate({
             path: "profileComments",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .populate({
             path: "friends",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .populate("hikes")
@@ -335,25 +340,29 @@ app.post("/user/secure", withAuth, function (req, res) {
         .populate({
             path: "profileComments",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .populate({
             path: "friends",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .populate({
             path: "sentRequests",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .populate({
             path: "receivedRequests",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .populate("hikes")
@@ -428,6 +437,7 @@ app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, 
                         new: true,
                     })
             })
+            .select('-password -sentRequests -receivedRequests')
             .then(
                 (updatedProfile) => {
                     res
@@ -480,7 +490,8 @@ app.get("/comment/:id", function (req, res) {
         .populate({
             path: "replies",
             populate: {
-                path: 'user'
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
             }
         })
         .then(function (commentRecord) {
@@ -529,6 +540,7 @@ app.post("/favorite", function (req, res) {
         { $addToSet: { hikes: hikeId } },
         { new: true }
     )
+    .select('-password -sentRequests -receivedRequests')
     .then(function (userRecord) {
         res.json(userRecord);
     })
@@ -545,6 +557,7 @@ app.delete("/favorite", function (req, res) {
         { $pull: { hikes: hikeId } },
         { new: true }
         )
+        .select('-password -sentRequests -receivedRequests')
         .then(function (userRecord) {
             res.json(userRecord);
         })
