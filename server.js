@@ -404,13 +404,18 @@ app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, 
             .end("No file received");
     } else {
         console.log('file received');
-        const imageFile = fs.readFileSync(req.file.path);
-        const encode_image = imageFile.toString('base64');
-        const finalImg = {
-            contentType: req.file.mimetype,
-            image: new Buffer.from(encode_image, 'base64')
-        };
-        db.Image.create({ ...finalImg, user: foundUser._id })
+        db.User.findOne({
+            email: req.email
+        })
+        then((foundUser) => {
+            const imageFile = fs.readFileSync(req.file.path);
+            const encode_image = imageFile.toString('base64');
+            const finalImg = {
+                contentType: req.file.mimetype,
+                image: new Buffer.from(encode_image, 'base64')
+            };
+            return db.Image.create({ ...finalImg, user: foundUser._id })
+        })
             .then((createdImage) => {
                 return db.User.findOneAndUpdate(
                     {
