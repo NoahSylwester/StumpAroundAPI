@@ -491,6 +491,7 @@ app.post("/stumpComment", function (req, res) {
 app.get("/comment/:id", function (req, res) {
     console.log("serverside ID is: ", req.params.id);
     db.Comment.findOne({ _id: req.params.id })
+        .populate('user')
         .populate({
             path: "replies",
             populate: {
