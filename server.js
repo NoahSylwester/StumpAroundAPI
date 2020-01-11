@@ -445,7 +445,7 @@ app.post("/comment", function (req, res) {
     })
 
 //route to add a hike comment
-app.post("stumpComment", function (req, res) {
+app.post("/stumpComment", function (req, res) {
     console.log(req.body);
     db.Comment.create({...req.body, stump: req.body.hike})
     .then(function (commentData) {
