@@ -407,7 +407,7 @@ app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, 
         db.User.findOne({
             email: req.email
         })
-        then((foundUser) => {
+        .then((foundUser) => {
             const imageFile = fs.readFileSync(req.file.path);
             const encode_image = imageFile.toString('base64');
             const finalImg = {
