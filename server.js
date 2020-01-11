@@ -445,8 +445,8 @@ app.post("/comment", function (req, res) {
     })
 
 //route to add a hike comment
-app.post("stump/comment", function (req, res) {
-    db.Comment.create(req.body)
+app.post("stumpComment", function (req, res) {
+    db.Comment.create({...req.body, stump: req.body.hike})
     .then(function (commentData) {
             console.log(commentData);
             db.Stump.findOneAndUpdate({ _id: req.body.hike }, { $push: { comments: commentData._id } }, { new: true })
