@@ -424,10 +424,13 @@ app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, 
                 contentType: req.file.mimetype,
                 image: new Buffer.from(encode_image, 'base64')
             };
-            return db.Image.create({ ...finalImg, user: foundUser._id })
+            return db.Image.findOneAndUpdate(
+                { user: foundUser._id},
+                { ...finalImg, user: foundUser._id },
+                { new: true, upsert: true })
         })
             .then((createdImage) => {
-                return db.User.findOneAndUpdate(
+                return (db.User.findOneAndUpdate(
                     {
                         email: req.email
                     },
@@ -437,8 +440,8 @@ app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, 
                     {
                         new: true,
                     })
+                    .select('-password -sentRequests -receivedRequests'))
             })
-            .select('-password -sentRequests -receivedRequests')
             .then(
                 (updatedProfile) => {
                     res
