@@ -177,6 +177,7 @@ app.post("/stump", withAuth, function(req, res) {
                 user: foundProfile._id,
                 latitude: req.body.latitude,
                 longitude: req.body.longitude,
+                tags: req.body.tags,
         })
         .then((newStump) => {
             res.json(newStump._id);
