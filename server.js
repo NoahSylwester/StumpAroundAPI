@@ -399,34 +399,41 @@ app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, 
     if (!req.file) {
         console.log("No file received");
         res
-        .status(403)
-        .contentType("text/plain")
-        .end("No file received");
+            .status(403)
+            .contentType("text/plain")
+            .end("No file received");
     } else {
         console.log('file received');
-        return db.User.findOne({
-            email: req.email
-        })
-        .then((foundProfile) => {
-            console.log('found:', foundProfile);
-            return db.User.findOneAndUpdate({ email: req.email }, { photo: `http://stump-around.herokuapp.com/photo/${foundProfile._id}` }, { new: true })
-        })
-        .then(
-            (updatedProfile) => {
-                console.log('updated:', updatedProfile);
-                const tempPath = req.file.path;
-                const targetPath = path.join(__dirname, `./uploads/images/${updatedProfile._id}.jpg`);
-                fs.rename(tempPath, targetPath, err => {
-                    if (err) return handleError(err, res);
-            
+        const imageFile = fs.readFileSync(req.file.path);
+        const encode_image = imageFile.toString('base64');
+        const finalImg = {
+            contentType: req.file.mimetype,
+            image: new Buffer.from(encode_image, 'base64')
+        };
+        db.Image.create({ ...finalImg, user: foundUser._id })
+            .then((createdImage) => {
+                return db.User.findOneAndUpdate(
+                    {
+                        email: req.email
+                    },
+                    {
+                        photo: 'http://stump-around.herokuapp.com/image/' + createdImage._id
+                    },
+                    {
+                        new: true,
+                    })
+            })
+            .then(
+                (updatedProfile) => {
                     res
-                    .status(200)
-                    // .contentType("text/plain")
-                    .json(updatedProfile);
-                });
-        })
-      }
-    })
+                        .status(200)
+                        .json(updatedProfile);
+                })
+            .catch(function (err) {
+                res.json(err);
+            });
+    }
+});
     
 //route to add a hike comment
 app.post("/comment", function (req, res) {
