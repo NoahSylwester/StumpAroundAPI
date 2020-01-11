@@ -514,7 +514,7 @@ app.post("/reply", function (req, res) {
             console.log(commentData);
             db.User.findOneAndUpdate({ _id: req.body.user }, { $push: { comments: commentData._id } }, { new: true })
             .then((result) => db.Comment.findOneAndUpdate({ _id: req.body.repliedTo }, { $push: { replies: commentData._id } }, { new: true }))
-            .then(res.json(commentData))
+            .then((updatedComment) => res.json(updatedComment))
         })
         .catch(function (err) {
             console.log(err);
