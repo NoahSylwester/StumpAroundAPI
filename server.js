@@ -383,7 +383,7 @@ app.post("/sendRequest", withAuth, function(req, res) {
         $addToSet: { sentRequests: req.body._id }
     },
     { 
-        new: true 
+        new: true, upsert: true
     })
     .then((foundUser) => {
         db.User.findOneAndUpdate({
@@ -393,7 +393,7 @@ app.post("/sendRequest", withAuth, function(req, res) {
             $addToSet: { receivedRequests: foundUser._id }
         },
         { 
-            new: true 
+            new: true, upsert: true 
         })
         .then((newPotentialFriend) => {
             res.json(newPotentialFriend);
@@ -413,7 +413,7 @@ app.post("/acceptRequest", withAuth, function(req, res) {
         $pull: { receivedRequests: req.body._id }
     },
     { 
-        new: true 
+        new: true, upsert: true
     })
     .then((foundUser) => {
         db.User.findOneAndUpdate({
@@ -424,7 +424,7 @@ app.post("/acceptRequest", withAuth, function(req, res) {
             $pull: { sentRequests: foundUser._id }
         },
         { 
-            new: true 
+            new: true, upsert: true
         })
         .then((newFriend) => {
             res.json(newFriend);
