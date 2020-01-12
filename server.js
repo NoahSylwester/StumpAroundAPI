@@ -455,8 +455,8 @@ app.delete("/removeFriend", withAuth, function(req, res) {
         { 
             new: true 
         })
-        .then(() => {
-            res.json(foundUser);
+        .then((removedFriend) => {
+            res.json(removedFriend);
         })
     })
     .catch(function (err) {
