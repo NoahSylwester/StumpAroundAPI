@@ -435,7 +435,7 @@ app.post("/acceptRequest", withAuth, function(req, res) {
     });
 })
 
-app.post("/removeFriend", withAuth, function(req, res) {
+app.delete("/removeFriend", withAuth, function(req, res) {
     db.User.findOneAndUpdate({
         email: req.email
     },
