@@ -426,8 +426,8 @@ app.post("/acceptRequest", withAuth, function(req, res) {
         { 
             new: true 
         })
-        .then(() => {
-            res.json(foundUser);
+        .then((newFriend) => {
+            res.json(newFriend);
         })
     })
     .catch(function (err) {
