@@ -375,6 +375,95 @@ app.post("/user/secure", withAuth, function (req, res) {
         });
 });
 
+app.post("/sendRequest", withAuth, function(req, res) {
+    db.User.findOneAndUpdate({
+        email: req.email
+    },
+    {
+        $addToSet: { sentRequests: req.body._id }
+    },
+    { 
+        new: true 
+    })
+    .then((foundUser) => {
+        db.User.findOneAndUpdate({
+            _id: req.body._id
+        },
+        {
+            $addToSet: { receivedRequests: foundUser._id }
+        },
+        { 
+            new: true 
+        })
+        .then((newPotentialFriend) => {
+            res.json(newPotentialFriend);
+        })
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+
+app.post("/acceptRequest", withAuth, function(req, res) {
+    db.User.findOneAndUpdate({
+        email: req.email
+    },
+    {
+        $addToSet: { friends: req.body._id },
+        $pull: { receivedRequests: req.body._id }
+    },
+    { 
+        new: true 
+    })
+    .then((foundUser) => {
+        db.User.findOneAndUpdate({
+            _id: req.body._id
+        },
+        {
+            $addToSet: { friends: foundUser._id },
+            $pull: { sentRequests: foundUser._id }
+        },
+        { 
+            new: true 
+        })
+        .then(() => {
+            res.json(foundUser);
+        })
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+
+app.post("/removeFriend", withAuth, function(req, res) {
+    db.User.findOneAndUpdate({
+        email: req.email
+    },
+    {
+        $pull: { friends: req.body._id }
+    },
+    { 
+        new: true 
+    })
+    .then((foundUser) => {
+        db.User.findOneAndUpdate({
+            _id: req.body._id
+        },
+        {
+            $pull: { friends: foundUser._id }
+        },
+        { 
+            new: true 
+        })
+        .then(() => {
+            res.json(foundUser);
+        })
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+
 app.get('/api/secret', withAuth, function(req, res) {
     res.send('YES');
 });
