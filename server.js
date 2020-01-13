@@ -97,6 +97,51 @@ app.post('/api/authenticate', function (req, res) {
         }
     })
 })
+
+//get route to get only one user's data
+app.post("/user/secure", withAuth, function (req, res) {
+    db.User.findOne({
+        email: req.email
+    })
+        .select('-password')
+        .populate("comments")
+        .populate({
+            path: "profileComments",
+            populate: {
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
+            }
+        })
+        .populate({
+            path: "friends",
+            populate: {
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
+            }
+        })
+        .populate({
+            path: "sentRequests",
+            populate: {
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
+            }
+        })
+        .populate({
+            path: "receivedRequests",
+            populate: {
+                path: 'user',
+                select: '-password -sentRequests -receivedRequests'
+            }
+        })
+        .populate("hikes")
+        .then(function (userRecord) {
+            res.json(userRecord);
+        })
+        .catch(function (err) {
+            res.json(err);
+        });
+});
+
 //post route to add hikes to database from API
 app.post("/hikes", function (req, res) {
     axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=500&key=200649274-302d66556efb2a72c44c396694a27540')
@@ -356,50 +401,6 @@ app.post("/user/:id", withAuth, function (req, res) {
     .catch(function (err) {
         res.json(err);
     });
-});
-
-//get route to get only one user's data
-app.post("/user/secure", withAuth, function (req, res) {
-    db.User.findOne({
-        email: req.email
-    })
-        .select('-password')
-        .populate("comments")
-        .populate({
-            path: "profileComments",
-            populate: {
-                path: 'user',
-                select: '-password -sentRequests -receivedRequests'
-            }
-        })
-        .populate({
-            path: "friends",
-            populate: {
-                path: 'user',
-                select: '-password -sentRequests -receivedRequests'
-            }
-        })
-        .populate({
-            path: "sentRequests",
-            populate: {
-                path: 'user',
-                select: '-password -sentRequests -receivedRequests'
-            }
-        })
-        .populate({
-            path: "receivedRequests",
-            populate: {
-                path: 'user',
-                select: '-password -sentRequests -receivedRequests'
-            }
-        })
-        .populate("hikes")
-        .then(function (userRecord) {
-            res.json(userRecord);
-        })
-        .catch(function (err) {
-            res.json(err);
-        });
 });
 
 app.post("/sendRequest", withAuth, function(req, res) {
