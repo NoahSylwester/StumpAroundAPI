@@ -398,6 +398,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                 .then(function (userRecord) {
                     console.log('denied', userRecord);
                     let limitedAccess = userRecord;
+                    limitedAccess.toObject();
                     limitedAccess.profileComments = 'denied';
                     limitedAccess.hikes = 'denied';
                     res.json(limitedAccess);
