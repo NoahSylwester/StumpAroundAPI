@@ -649,9 +649,6 @@ app.delete("/favorite", withAuth, function (req, res) {
         )
         .select('-password -sentRequests -receivedRequests')
         .then(function (userRecord) {
-            console.log(userRecord);
-            console.log(req.email);
-            console.log(req.body.hikeId);
             res.json(userRecord);
         })
     .catch(function (err) {
