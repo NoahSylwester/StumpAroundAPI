@@ -355,6 +355,7 @@ app.post("/user/:id", withAuth, function (req, res) {
             _id: req.params.id
         })
         .then((foundUser) => {
+            console.log(foundUser.friends);
             if (foundUser.friends.includes(queryingUser._id)) {
                 foundUser
                 .select('-password -sentRequests -receivedRequests')
