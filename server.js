@@ -301,34 +301,61 @@ app.get("/stump/:id", function (req, res) {
 
 
 //get route to get only one user's data
-app.get("/user/:username", function (req, res) {
-    let name = req.params.username;
+app.post("/user/:id", withAuth, function (req, res) {
     db.User.findOne({
-        name: name
+        email: req.email
     })
-        .select('-password -sentRequests -receivedRequests')
-        .populate("comments")
-        .populate({
-            path: "profileComments",
-            populate: {
-                path: 'user',
-                select: '-password -sentRequests -receivedRequests'
-            }
+    .then((queryingUser) => {
+        return db.User.findOne({
+            _id: req.params.id
         })
-        .populate({
-            path: "friends",
-            populate: {
-                path: 'user',
-                select: '-password -sentRequests -receivedRequests'
+        .then((foundUser) => {
+            if (foundUser.friends.includes(queryingUser._id)) {
+                foundUser
+                .select('-password -sentRequests -receivedRequests')
+                .populate("comments")
+                .populate({
+                    path: "profileComments",
+                    populate: {
+                        path: 'user',
+                        select: '-password -sentRequests -receivedRequests'
+                    }
+                })
+                .populate({
+                    path: "friends",
+                    populate: {
+                        path: 'user',
+                        select: '-password -sentRequests -receivedRequests'
+                    }
+                })
+                .populate("hikes")
+                .then(function (userRecord) {
+                    res.json(userRecord);
+                })
             }
-        })
-        .populate("hikes")
-        .then(function (userRecord) {
-            res.json(userRecord);
+            else {
+                foundUser
+                .select('-password -sentRequests -receivedRequests -profileComments -hikes')
+                .populate({
+                    path: "friends",
+                    populate: {
+                        path: 'user',
+                        select: '-password -sentRequests -receivedRequests'
+                    }
+                })
+                .then(function (userRecord) {
+                    let limitedAccess = { ...userRecord, profileComments: 'denied', hikes: 'denied' }
+                    res.json(limitedAccess);
+                })
+            }
         })
         .catch(function (err) {
             res.json(err);
         });
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
 });
 
 //get route to get only one user's data
