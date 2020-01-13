@@ -357,7 +357,9 @@ app.post("/user/:id", withAuth, function (req, res) {
         .then((foundUser) => {
             if (foundUser.friends.includes(queryingUser._id)) {
                 console.log('friend')
-                foundUser
+                db.User.findOne({
+                    _id: foundUser.id
+                })
                 .select('-password -sentRequests -receivedRequests')
                 .populate("comments")
                 .populate({
@@ -382,7 +384,9 @@ app.post("/user/:id", withAuth, function (req, res) {
             }
             else {
                 console.log('not friend')
-                foundUser
+                db.User.findOne({
+                    _id: foundUser.id
+                })
                 .select('-password -sentRequests -receivedRequests -profileComments -hikes')
                 .populate({
                     path: "friends",
