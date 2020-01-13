@@ -351,7 +351,7 @@ app.post("/user/:id", withAuth, function (req, res) {
         email: req.email
     })
     .then((queryingUser) => {
-        return db.User.findOne({
+        db.User.findOne({
             _id: req.params.id
         })
         .then((foundUser) => {
