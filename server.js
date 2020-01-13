@@ -387,7 +387,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                 db.User.findOne({
                     _id: foundUser.id
                 })
-                .select('-password -sentRequests -receivedRequests')// -profileComments -hikes')
+                .select('-password -sentRequests -receivedRequests -profileComments -hikes')
                 .populate({
                     path: "friends",
                     populate: {
@@ -397,11 +397,11 @@ app.post("/user/:id", withAuth, function (req, res) {
                 })
                 .then(function (userRecord) {
                     console.log('denied', userRecord);
-                    let limitedAccess = userRecord;
-                    limitedAccess.toObject();
+                    let preDenied = userRecord;
+                    let limitedAccess = preDenied.toObject();
                     limitedAccess.profileComments = 'denied';
                     limitedAccess.hikes = 'denied';
-                    console.log(limitedAccess);
+                    console.log(limitedAccess)
                     res.json(limitedAccess);
                 })
             }
