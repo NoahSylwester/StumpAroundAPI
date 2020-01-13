@@ -387,7 +387,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                 db.User.findOne({
                     _id: foundUser.id
                 })
-                .select('-password -sentRequests -receivedRequests -profileComments -hikes')
+                .select('-password -sentRequests -receivedRequests')// -profileComments -hikes')
                 .populate({
                     path: "friends",
                     populate: {
@@ -401,6 +401,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                     limitedAccess.toObject();
                     limitedAccess.profileComments = 'denied';
                     limitedAccess.hikes = 'denied';
+                    console.log(limitedAccess);
                     res.json(limitedAccess);
                 })
             }
