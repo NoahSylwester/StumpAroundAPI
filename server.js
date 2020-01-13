@@ -626,12 +626,10 @@ app.post("/profileComment", function (req, res) {
     })
 
 //route to add a hike to favorites
-app.post("/favorite", function (req, res) {
-    let userId = req.body.userId;
-    let hikeId = req.body.hikeId;
+app.post("/favorite", withAuth, function (req, res) {
     db.User.findOneAndUpdate(
-        { _id: userId },
-        { $addToSet: { hikes: hikeId } },
+        { email: req.email },
+        { $addToSet: { hikes: req.body.hikeId } },
         { new: true }
     )
     .select('-password -sentRequests -receivedRequests')
@@ -643,16 +641,17 @@ app.post("/favorite", function (req, res) {
     });
 })
 //route to delete a favorite from user
-app.delete("/favorite", function (req, res) {
-    let userId = req.body.userId;
-    let hikeId = req.body.hikeId;
+app.delete("/favorite", withAuth, function (req, res) {
     db.User.findOneAndUpdate(
-        { _id: userId },
-        { $pull: { hikes: hikeId } },
+        { email: req.email },
+        { $pull: { hikes: req.body.hikeId } },
         { new: true }
         )
         .select('-password -sentRequests -receivedRequests')
         .then(function (userRecord) {
+            console.log(userRecord);
+            console.log(req.email);
+            console.log(req.body.hikeId);
             res.json(userRecord);
         })
     .catch(function (err) {
