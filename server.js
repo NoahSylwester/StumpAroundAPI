@@ -355,7 +355,6 @@ app.post("/user/:id", withAuth, function (req, res) {
             _id: req.params.id
         })
         .then((foundUser) => {
-            console.log(foundUser);
             if (foundUser.friends.includes(queryingUser._id)) {
                 foundUser
                 .select('-password -sentRequests -receivedRequests')
@@ -376,6 +375,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                 })
                 .populate("hikes")
                 .then(function (userRecord) {
+                    console.log('friend', userRecord);
                     res.json(userRecord);
                 })
             }
@@ -390,6 +390,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                     }
                 })
                 .then(function (userRecord) {
+                    console.log('denied', userRecord);
                     let limitedAccess = { ...userRecord, profileComments: 'denied', hikes: 'denied' }
                     res.json(limitedAccess);
                 })
