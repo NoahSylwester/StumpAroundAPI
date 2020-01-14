@@ -183,7 +183,7 @@ app.get("/hikes", function (req, res) {
 //{ <field>: { $regex: /pattern/, $options: '<options>' } }
 //get call to get all hikes from database
 app.get("/hikes/:field/:searchTerm", function (req, res) {
-    const regex = `/${req.params.searchTerm}/`;
+    const regex = new RegExp(`/${req.params.searchTerm}/`);
     db.Hike.find({ [req.params.field]: { $regex: regex, $options: 'i' } })
         .then(function (records) {
             res.json(records);
