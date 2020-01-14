@@ -134,6 +134,7 @@ app.post("/user/secure", withAuth, function (req, res) {
             }
         })
         .populate("hikes")
+        .populate("stumps")
         .then(function (userRecord) {
             res.json(userRecord);
         })
@@ -377,6 +378,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                     }
                 })
                 .populate("hikes")
+                .populate("stumps")
                 .then(function (userRecord) {
                     console.log('friend', userRecord);
                     res.json(userRecord);
@@ -387,7 +389,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                 db.User.findOne({
                     _id: foundUser.id
                 })
-                .select('-password -sentRequests -receivedRequests -profileComments -hikes')
+                .select('-password -sentRequests -receivedRequests -profileComments -hikes -stumps')
                 .populate({
                     path: "friends",
                     populate: {
