@@ -180,11 +180,42 @@ app.get("/hikes", function (req, res) {
             res.json(records);
         })
 });
-//{ <field>: { $regex: /pattern/, $options: '<options>' } }
-//get call to get all hikes from database
+
+//get call to get a random ten hikes from database
+app.get("/hikes/random", async function (req, res) {
+    let randomArray = [];
+    const count = await db.Hike.count();
+    for ( let i = 0; i < 10; i ++ ) {
+        let randomResult = await db.Hike.findOne({}, null, { skip: Math.floor(Math.random() * count) });
+        randomArray.push(randomResult);
+    }
+    res.json(randomArray);
+});
+
+//get call to get a random ten stumps from database
+app.get("/stumps/random", async function (req, res) {
+    let randomArray = [];
+    const count = await db.Stump.count();
+    for ( let i = 0; i < 10; i ++ ) {
+        let randomResult = await db.Stump.findOne({}, null, { skip: Math.floor(Math.random() * count) });
+        randomArray.push(randomResult);
+    }
+    res.json(randomArray);
+});
+
+//get call to get searched hikes from database
 app.get("/hikes/:field/:searchTerm", function (req, res) {
     const regex = new RegExp(req.params.searchTerm);
     db.Hike.find({ [req.params.field]: { $regex: regex, $options: 'i' } })
+        .then(function (records) {
+            res.json(records);
+        })
+});
+
+//get call to get searched hikes from database
+app.get("/stumps/:field/:searchTerm", function (req, res) {
+    const regex = new RegExp(req.params.searchTerm);
+    db.Stump.find({ [req.params.field]: { $regex: regex, $options: 'i' } })
         .then(function (records) {
             res.json(records);
         })
