@@ -401,6 +401,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                     let limitedAccess = preDenied.toObject();
                     limitedAccess.profileComments = 'denied';
                     limitedAccess.hikes = 'denied';
+                    limitedAccess.stumps = 'denied';
                     console.log(limitedAccess)
                     res.json(limitedAccess);
                 })
@@ -685,6 +686,37 @@ app.delete("/favorite", withAuth, function (req, res) {
     db.User.findOneAndUpdate(
         { email: req.email },
         { $pull: { hikes: req.body.hikeId } },
+        { new: true }
+        )
+        .select('-password -sentRequests -receivedRequests')
+        .then(function (userRecord) {
+            res.json(userRecord);
+        })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+
+//route to add a hike to favorites
+app.post("/favorite/stump", withAuth, function (req, res) {
+    db.User.findOneAndUpdate(
+        { email: req.email },
+        { $addToSet: { stumps: req.body.stumpId } },
+        { new: true }
+    )
+    .select('-password -sentRequests -receivedRequests')
+    .then(function (userRecord) {
+        res.json(userRecord);
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+//route to delete a favorite from user
+app.delete("/favorite/stump", withAuth, function (req, res) {
+    db.User.findOneAndUpdate(
+        { email: req.email },
+        { $pull: { stumps: req.body.stumpId } },
         { new: true }
         )
         .select('-password -sentRequests -receivedRequests')
