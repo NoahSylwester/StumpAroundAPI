@@ -180,6 +180,15 @@ app.get("/hikes", function (req, res) {
             res.json(records);
         })
 });
+//{ <field>: { $regex: /pattern/, $options: '<options>' } }
+//get call to get all hikes from database
+app.get("/hikes/:field/:searchTerm", function (req, res) {
+    const regex = `/${req.params.searchTerm}/`;
+    db.Hike.find({ [req.params.field]: { $regex: regex, $options: 'i' } })
+        .then(function (records) {
+            res.json(records);
+        })
+});
 
 //get call to grab only one hike from database
 app.get("/hike/:id", function (req, res) {
