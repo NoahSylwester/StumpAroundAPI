@@ -215,10 +215,24 @@ app.get("/hikes/:field/:searchTerm", function (req, res) {
 //get call to get searched hikes from database
 app.get("/stumps/:field/:searchTerm", function (req, res) {
     const regex = new RegExp(req.params.searchTerm);
+    if (req.params.field === 'name' || req.params.field === 'location') {
     db.Stump.find({ [req.params.field]: { $regex: regex, $options: 'i' } })
         .then(function (records) {
             res.json(records);
         })
+        .catch(function (err) {
+            res.json(err);
+            });
+    }
+    else if (req.params.field === 'tags') {
+        db.Stump.find({ [req.params.field]: { $in: [ req.params.searchTerm ] } })
+        .then(function (records) {
+            res.json(records);
+        })
+        .catch(function (err) {
+            res.json(err);
+            });
+    }
 });
 
 //get call to grab only one hike from database
