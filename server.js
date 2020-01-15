@@ -532,6 +532,24 @@ app.post("/acceptRequest", withAuth, function(req, res) {
     });
 })
 
+app.delete("/removeRequest", withAuth, function(req, res) {
+    db.User.findOneAndUpdate({
+        email: req.email
+    },
+    {
+        $pull: { receivedRequests: req.body._id }
+    },
+    { 
+        new: true 
+    })
+    .then((updatedUser) => {
+        res.json(updatedUser);
+    })
+    .catch(function (err) {
+        res.json(err);
+    });
+})
+
 app.delete("/removeFriend", withAuth, function(req, res) {
     db.User.findOneAndUpdate({
         email: req.email
