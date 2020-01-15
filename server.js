@@ -157,7 +157,7 @@ app.post("/hikes", function (req, res) {
                     summary: trailsData[i].summary,
                     photo: trailsData[i].imgMedium,
                     length: trailsData[i].length,
-                    latitude: trailsData[i].longitude,
+                    latitude: trailsData[i].latitude,
                     longitude: trailsData[i].longitude,     
                 })
                     .catch(function (err) {
