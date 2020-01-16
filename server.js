@@ -266,9 +266,9 @@ app.get('/image/:id', (req, res) => {
     })
 //AIzaSyCxVNFOHr5A41exxwglh7c4BnKxEa2DoIc
 //post route to add stump to database
-app.post("/stump", withAuth, async function(req, res) {
-    const geocodeResponse = await axios.get(`http://open.mapquestapi.com/geocoding/v1/reverse?key=HaU50MrThMO1BMy8I0kklxYAVz8FqEpE&location=${req.body.latitude},${req.body.longitude}`);
-    const geocode = await geocodeResponse.json();
+app.post("/stump", withAuth, function(req, res) {
+    // const geocodeResponse = await axios.get(`http://open.mapquestapi.com/geocoding/v1/reverse?key=HaU50MrThMO1BMy8I0kklxYAVz8FqEpE&location=${req.body.latitude},${req.body.longitude}`);
+    // const geocode = await geocodeResponse.json();
     db.User.findOne({
         email: req.email
     })
@@ -279,7 +279,7 @@ app.post("/stump", withAuth, async function(req, res) {
                 user: foundProfile._id,
                 latitude: req.body.latitude,
                 longitude: req.body.longitude,
-                location: `${geocode.results.locations[0].adminArea5}, ${geocode.results.locations[0].adminArea3}`,
+                // location: `${geocode.results.locations[0].adminArea5}, ${geocode.results.locations[0].adminArea3}`,
                 tags: req.body.tags,
         })
         .then((newStump) => {
