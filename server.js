@@ -9,6 +9,7 @@ const fs = require('fs');
 const uuidv1 = require('uuid/v1');
 const path = require('path');
 const User = require('./models/User.js');
+const usStateNames = require('./usStateNames');
 const secret = process.env.SECRET;
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -281,7 +282,7 @@ app.post("/stump", withAuth, async function(req, res) {
                 user: foundProfile._id,
                 latitude: req.body.latitude,
                 longitude: req.body.longitude,
-                location: `${geocode.data.results[0].locations[0].adminArea5}, ${geocode.data.results[0].locations[0].adminArea3}`,
+                location: `${geocode.data.results[0].locations[0].adminArea5}, ${usStateNames[geocode.data.results[0].locations[0].adminArea3]}`,
                 tags: req.body.tags,
         })
         .then((newStump) => {
