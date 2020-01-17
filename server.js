@@ -281,7 +281,7 @@ app.post("/stump", withAuth, async function(req, res) {
                 user: foundProfile._id,
                 latitude: req.body.latitude,
                 longitude: req.body.longitude,
-                location: `${geocode.data.results.locations[0].adminArea5}, ${geocode.results.locations[0].adminArea3}`,
+                location: `${geocode.data.results[0].locations[0].adminArea5}, ${geocode.data.results[0].locations[0].adminArea3}`,
                 tags: req.body.tags,
         })
         .then((newStump) => {
