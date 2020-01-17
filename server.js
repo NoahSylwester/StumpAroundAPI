@@ -268,6 +268,9 @@ app.get('/image/:id', (req, res) => {
 //post route to add stump to database
 app.post("/stump", withAuth, async function(req, res) {
     const geocode = await axios.get(`http://open.mapquestapi.com/geocoding/v1/reverse?key=HaU50MrThMO1BMy8I0kklxYAVz8FqEpE&location=${req.body.latitude},${req.body.longitude}`);
+    console.log(geocode);
+    console.log(geocode.data);
+    console.log(geocode.data.results)
     db.User.findOne({
         email: req.email
     })
