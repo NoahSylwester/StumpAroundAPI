@@ -24,9 +24,9 @@ const handleError = (err, res) => {
       .end("Oops! Something went wrong!");
   };
 
+  // set up multer oath
 const upload = multer({dest: __dirname + '/uploads/temp'});
-// const storage = multer.memoryStorage()
-// const upload = multer({ storage: storage })
+
 
 const PORT = process.env.PORT || 8080;
 
@@ -61,6 +61,7 @@ app.post('/api/register', function (req, res) {
     });
 });
 
+// POST route to login
 app.post('/api/authenticate', function (req, res) {
     const { email, password } = req.body;
     User.findOne({ email }, function (err, user) {
@@ -99,12 +100,14 @@ app.post('/api/authenticate', function (req, res) {
     })
 })
 
-//get route to get only one user's data
+// POST route to get only one user's data, with authentication
 app.post("/user/secure", withAuth, function (req, res) {
     db.User.findOne({
         email: req.email
     })
+        // don't return password hash
         .select('-password')
+        // populate users through comments, friends, and requests
         .populate("comments")
         .populate({
             path: "profileComments",
@@ -144,7 +147,7 @@ app.post("/user/secure", withAuth, function (req, res) {
         });
 });
 
-//post route to add hikes to database from API
+// POST route to add hikes to database from API
 app.post("/hikes", function (req, res) {
     axios.get('https://www.hikingproject.com/data/get-trails?lat=45.52345&lon=-122.67621&maxDistance=500&maxResults=500&key=200649274-302d66556efb2a72c44c396694a27540')
         .then(function (response) {
@@ -174,7 +177,7 @@ app.post("/hikes", function (req, res) {
     res.redirect("/hikes");
 });
 
-//get call to get all hikes from database
+// GET call to get all hikes from database
 app.get("/hikes", function (req, res) {
     db.Hike.find({})
         .then(function (records) {
@@ -182,7 +185,7 @@ app.get("/hikes", function (req, res) {
         })
 });
 
-//get call to get a random ten hikes from database
+// GET call to get a random ten hikes from database
 app.get("/hikes/random", async function (req, res) {
     let randomArray = [];
     const count = await db.Hike.count();
@@ -193,7 +196,7 @@ app.get("/hikes/random", async function (req, res) {
     res.json(randomArray);
 });
 
-//get call to get a random ten stumps from database
+// GET call to get a random ten stumps from database
 app.get("/stumps/random", async function (req, res) {
     let randomArray = [];
     const count = await db.Stump.count();
@@ -204,7 +207,7 @@ app.get("/stumps/random", async function (req, res) {
     res.json(randomArray);
 });
 
-//get call to get searched hikes from database
+// GET call to get searched hikes from database
 app.get("/hikes/:field/:searchTerm", function (req, res) {
     const regex = new RegExp(req.params.searchTerm);
     db.Hike.find({ [req.params.field]: { $regex: regex, $options: 'i' } })
@@ -213,7 +216,7 @@ app.get("/hikes/:field/:searchTerm", function (req, res) {
         })
 });
 
-//get call to get searched hikes from database
+// GET call to get searched stumps from database
 app.get("/stumps/:field/:searchTerm", function (req, res) {
     const regex = new RegExp(req.params.searchTerm);
     if (req.params.field === 'name' || req.params.field === 'location') {
@@ -236,7 +239,7 @@ app.get("/stumps/:field/:searchTerm", function (req, res) {
     }
 });
 
-//get call to grab only one hike from database
+// GET call to grab only one hike from database
 app.get("/hike/:id", function (req, res) {
     console.log("serverside ID is: ", req.params.id);
     db.Hike.findOne({ _id: req.params.id })
@@ -255,6 +258,7 @@ app.get("/hike/:id", function (req, res) {
         });
 });
 
+// GET call to render an image stored in database
 app.get('/image/:id', (req, res) => {
     db.Image.findOne({'_id': req.params.id })
     .then((result) => {  
@@ -265,13 +269,10 @@ app.get('/image/:id', (req, res) => {
         res.json(err);
         });
     })
-//AIzaSyCxVNFOHr5A41exxwglh7c4BnKxEa2DoIc
-//post route to add stump to database
+
+// POST route to add stump to database
 app.post("/stump", withAuth, async function(req, res) {
     const geocode = await axios.get(`http://open.mapquestapi.com/geocoding/v1/reverse?key=HaU50MrThMO1BMy8I0kklxYAVz8FqEpE&location=${req.body.latitude},${req.body.longitude}`);
-    console.log(geocode);
-    console.log(geocode.data);
-    console.log(geocode.data.results)
     db.User.findOne({
         email: req.email
     })
@@ -294,6 +295,8 @@ app.post("/stump", withAuth, async function(req, res) {
         res.json({ error: 1 })
     })
 })
+
+// PUT route to update a stump with an image. Called on stump creation
 app.put("/stump/image/:stumpid", withAuth, upload.single('file'), function (req, res) {
     if (!req.file) {
         console.log("No photo received");
@@ -306,12 +309,14 @@ app.put("/stump/image/:stumpid", withAuth, upload.single('file'), function (req,
             email: req.email
         })
         .then((foundUser) => {
+            // stores image temporarily in file directory
             const imageFile = fs.readFileSync(req.file.path);
             const encode_image = imageFile.toString('base64');
             const finalImg = {
                 contentType: req.file.mimetype,
                 image:  new Buffer.from(encode_image, 'base64')
             };
+            // reads image buffer into database
             db.Image.create({ ...finalImg, user: foundUser._id})
             .then((createdImage) => {
                 db.Stump.findOneAndUpdate({
@@ -331,53 +336,7 @@ app.put("/stump/image/:stumpid", withAuth, upload.single('file'), function (req,
     }
 });
 
-//post route to add stump to database
-// app.put("/stump/photo", withAuth, upload.single('file'), function (req, res) {
-//     const hash = uuidv1();
-//     let userId;
-//     if (!req.file) {
-//         console.log("No photo received");
-//         res
-//         .status(403)
-//         .contentType("text/plain")
-//         .end("No photo received");
-//     } else {
-//         console.log('file received');
-//         return db.User.findOne({
-//             email: req.email
-//         })
-//         .then((foundProfile) => {
-//             console.log('found:', foundProfile);
-//             userId = foundProfile._id;
-//             return db.Stump.create({
-//                 name: req.body.name,
-//                 summary: req.body.summary,
-//                 user: foundProfile._id,
-//                 photo: `http://stump-around.herokuapp.com/photo/${userId}${hash}`,
-//                 latitude: req.body.latitude,
-//                 longitude: req.body.longitude,
-//             })
-//         })
-//         .then((createdStump) => {
-//                 console.log('updated:', createdStump);
-//                 const tempPath = req.file.path;
-//                 const targetPath = path.join(__dirname, `./uploads/images/${userId}${hash}.jpg`);
-//                 fs.rename(tempPath, targetPath, err => {
-//                     if (err) return handleError(err, res);
-            
-//                     res
-//                     .status(200)
-//                     // .contentType("text/plain")
-//                     .json(createdStump);
-//                 });
-//         })
-//         .catch(function (err) {
-//                 console.log("An error has occurred.");
-//         })
-//     }
-// });
-
-//get call to get all stumps from database
+// GET call to get all stumps from database
 app.get("/stumps", function (req, res) {
     db.Stump.find({})
         .then(function (records) {
@@ -385,7 +344,7 @@ app.get("/stumps", function (req, res) {
         })
 });
 
-//get call to grab only one stump from database
+// GET call to grab only one stump from database
 app.get("/stump/:id", function (req, res) {
     console.log("serverside ID is: ", req.params.id);
     db.Stump.findOne({ _id: req.params.id })
@@ -406,7 +365,7 @@ app.get("/stump/:id", function (req, res) {
 });
 
 
-//get route to get only one user's data
+// secure POST route to get only one user's data
 app.post("/user/:id", withAuth, function (req, res) {
     db.User.findOne({
         email: req.email
@@ -416,11 +375,12 @@ app.post("/user/:id", withAuth, function (req, res) {
             _id: req.params.id
         })
         .then((foundUser) => {
+            // if you are friends with user, display info
             if (foundUser.friends.includes(queryingUser._id)) {
-                console.log('friend')
                 db.User.findOne({
                     _id: foundUser.id
                 })
+                // remove sensitive data, populate branching data 
                 .select('-password -sentRequests -receivedRequests')
                 .populate("comments")
                 .populate({
@@ -445,7 +405,7 @@ app.post("/user/:id", withAuth, function (req, res) {
                 })
             }
             else {
-                console.log('not friend')
+                // if not friemds with user, display limited info
                 db.User.findOne({
                     _id: foundUser.id
                 })
@@ -458,13 +418,11 @@ app.post("/user/:id", withAuth, function (req, res) {
                     }
                 })
                 .then(function (userRecord) {
-                    console.log('denied', userRecord);
                     let preDenied = userRecord;
                     let limitedAccess = preDenied.toObject();
                     limitedAccess.profileComments = 'denied';
                     limitedAccess.hikes = 'denied';
                     limitedAccess.stumps = 'denied';
-                    console.log(limitedAccess)
                     res.json(limitedAccess);
                 })
             }
@@ -478,6 +436,7 @@ app.post("/user/:id", withAuth, function (req, res) {
     });
 });
 
+// POST route to send friend request
 app.post("/sendRequest", withAuth, function(req, res) {
     db.User.findOneAndUpdate({
         email: req.email
@@ -507,11 +466,13 @@ app.post("/sendRequest", withAuth, function(req, res) {
     });
 })
 
+// POST route to accept friend request
 app.post("/acceptRequest", withAuth, function(req, res) {
     db.User.findOneAndUpdate({
         email: req.email
     },
     {
+        // add user to friends, remove from requests
         $addToSet: { friends: req.body._id },
         $pull: { receivedRequests: req.body._id }
     },
@@ -523,6 +484,7 @@ app.post("/acceptRequest", withAuth, function(req, res) {
             _id: req.body._id
         },
         {
+            // add accepting user to friends of requesting user, remove from sent requests
             $addToSet: { friends: foundUser._id },
             $pull: { sentRequests: foundUser._id }
         },
@@ -538,6 +500,7 @@ app.post("/acceptRequest", withAuth, function(req, res) {
     });
 })
 
+// DELETE request to remove user from requests
 app.delete("/removeRequest", withAuth, function(req, res) {
     db.User.findOneAndUpdate({
         email: req.email
@@ -556,6 +519,7 @@ app.delete("/removeRequest", withAuth, function(req, res) {
     });
 })
 
+// DELETE request to remove user from friends
 app.delete("/removeFriend", withAuth, function(req, res) {
     db.User.findOneAndUpdate({
         email: req.email
@@ -588,7 +552,7 @@ app.delete("/removeFriend", withAuth, function(req, res) {
 app.get('/api/secret', withAuth, function(req, res) {
     res.send('YES');
 });
- // route to ckeck the token
+ // route to check the token
  app.get('/checkToken', withAuth, function(req, res) {
     res.sendStatus(200);
 });
@@ -613,7 +577,6 @@ app.get('/photo/:imgId', (req, res) => {
     res.sendFile(__dirname + `/uploads/images/${req.params.imgId}.jpg`);
 })
 
-// const upload = multer({dest: '/uploads/temp'});
 //route to update a user's photo
 app.post("/profileImageUpload", withAuth, upload.single('file'), function (req, res) {
     if (!req.file) {
@@ -848,24 +811,3 @@ app.post("/signup", function (req, res) {
 app.listen(PORT, function () {
     console.log("App running on port " + PORT + "!");
 });
-
-    //post route to add a user to the database
-    // app.post("/user/add", function (req, res) {
-    //     console.log("post user add", req.body);
-    //     let name = req.body.name;
-    //     db.User.find({ name: name }, { name: 1 }).limit(1)
-    //         .then(function (userRecords) {
-    //             console.log(userRecords);
-    //             if (userRecords.length) {
-    //                 console.log("user exists already; cannot add user");
-    //             }
-    //             else {
-    //                 console.log("new user; adding to database");
-    //                 db.User.create({
-    //                     name: req.body.name,
-    //                     password: req.body.password,
-    //                     email: req.body.email
-    //                 })
-    //             }
-    //         })
-    // });
